@@ -1,0 +1,24 @@
+[versions]
+spring-boot = "3.5.5"
+spring-dependency-management = "1.1.7"
+springdoc = "2.8.13"
+springwolf = "1.17.0"
+freefair-lombok = "9.0.0-rc2"
+lombok = "1.18.42"
+checkstyle = "11.0.1"
+jacoco = "0.8.12"
+versions = "0.53.0"
+jib = "3.4.5"
+
+[libraries]
+springdoc = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
+springwolfstomp = { module = "io.github.springwolf:springwolf-stomp", version.ref = "springwolf" }
+springwolfstompbinding = { module = "io.github.springwolf:springwolf-stomp-binding", version.ref = "springwolf" }
+springwolfui = { module = "io.github.springwolf:springwolf-ui", version.ref = "springwolf" }
+
+[plugins]
+spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
+spring-dependency-management = { id = "io.spring.dependency-management", version.ref = "spring-dependency-management" }
+freefair-lombok = { id = "io.freefair.lombok", version.ref = "freefair-lombok" }
+versions = { id = "com.github.ben-manes.versions", version.ref = "versions" }
+jib = { id = "com.google.cloud.tools.jib", version.ref = "jib" }

@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: testfachdienst
+  labels:
+    app: testfachdienst
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: testfachdienst
+  template:
+    metadata:
+      labels:
+        app: testfachdienst
+    spec:
+      containers:
+        - name: testfachdienst
+          image: your-docker-registry.example.org/zeta/testing/testfachdienst:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+            - containerPort: 8081
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod,k8s"
+            - name: SERVER_PORT
+              value: "8080"
+            - name: MANAGEMENT_SERVER_PORT
+              value: "8081"
+            - name: SERVER_CONTEXT_PATH
+              value: "/"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8081
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8081
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65532
+            runAsGroup: 65532
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL

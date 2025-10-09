@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <property name="LOGS" value="./logs"/>
+
+  <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+      <pattern>%d{ISO8601} %-5level [%thread] %logger{36} - %msg%n%ex</pattern>
+    </encoder>
+  </appender>
+
+  <root level="INFO">
+    <appender-ref ref="Console"/>
+  </root>
+
+  <logger name="com.achelos" level="DEBUG" additivity="false">
+    <appender-ref ref="Console"/>
+  </logger>
+
+</configuration>
