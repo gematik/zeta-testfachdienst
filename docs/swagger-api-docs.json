@@ -1,0 +1,454 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "OpenAPI definition",
+    "version": "v0"
+  },
+  "servers": [
+    {
+      "url": "https://localhost:8080/achelos_testfachdienst",
+      "description": "Generated server url"
+    }
+  ],
+  "paths": {
+    "/api/erezept/{id}": {
+      "get": {
+        "tags": [
+          "erezept-controller"
+        ],
+        "operationId": "get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ERezept"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "erezept-controller"
+        ],
+        "operationId": "update",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ERezept"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "erezept-controller"
+        ],
+        "operationId": "delete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/erezept": {
+      "get": {
+        "tags": [
+          "erezept-controller"
+        ],
+        "operationId": "list",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ERezept"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "erezept-controller"
+        ],
+        "operationId": "create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ERezept"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/springwolf/ui-config": {
+      "get": {
+        "tags": [
+          "ui-config-controller"
+        ],
+        "operationId": "getUiConfig",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/io.github.springwolf.core.controller.UiConfigController.UiConfig"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/springwolf/docs": {
+      "get": {
+        "tags": [
+          "async-api-controller"
+        ],
+        "operationId": "asyncApiYaml",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/yaml": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/springwolf/docs/{group}": {
+      "get": {
+        "tags": [
+          "async-api-controller"
+        ],
+        "operationId": "asyncApiYaml_1",
+        "parameters": [
+          {
+            "name": "group",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/yaml": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/springwolf/docs.yaml": {
+      "get": {
+        "tags": [
+          "async-api-controller"
+        ],
+        "operationId": "asyncApiYaml_2",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/yaml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/springwolf/docs.json": {
+      "get": {
+        "tags": [
+          "async-api-controller"
+        ],
+        "operationId": "asyncApiJson",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/hellozeta": {
+      "get": {
+        "tags": [
+          "hello-zeta-controller"
+        ],
+        "operationId": "getHelloZetaResponse",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/de.gematik.zeta.testfachdienst.model.HelloZetaResource"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/erezept/by-prescription/{prescriptionId}": {
+      "get": {
+        "tags": [
+          "erezept-controller"
+        ],
+        "operationId": "byPrescriptionId",
+        "parameters": [
+          {
+            "name": "prescriptionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ERezept"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ERezept": {
+        "type": "object",
+        "description": "A prescription (ERezept)",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unique identifier",
+            "example": 123,
+            "readOnly": true
+          },
+          "medicationName": {
+            "type": "string",
+            "description": "Medication name",
+            "example": "Ibuprofen 400 mg",
+            "minLength": 1
+          },
+          "dosage": {
+            "type": "string",
+            "description": "Dosage instructions",
+            "example": 1,
+            "minLength": 1
+          },
+          "issuedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When it was issued (ISO-8601)",
+            "example": "2025-09-22T10:30:00Z"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When it expires (ISO-8601)",
+            "example": "2025-12-31T23:59:59Z"
+          },
+          "status": {
+            "type": "string",
+            "description": "Current status",
+            "enum": [
+              "CREATED",
+              "SIGNED",
+              "DISPENSED",
+              "CANCELLED",
+              "EXPIRED"
+            ]
+          },
+          "patientId": {
+            "type": "string",
+            "description": "FHIR/PKV patient identifier",
+            "example": "PAT-123456",
+            "minLength": 1
+          },
+          "practitionerId": {
+            "type": "string",
+            "description": "Identifier of prescribing practitioner",
+            "example": "PRAC-98765",
+            "minLength": 1
+          },
+          "prescriptionId": {
+            "type": "string",
+            "description": "Prescription identifier",
+            "example": "RX-2025-000123",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "dosage",
+          "medicationName",
+          "patientId",
+          "practitionerId",
+          "prescriptionId"
+        ],
+        "title": "Erezept"
+      },
+      "io.github.springwolf.core.controller.UiConfigController.UiConfig": {
+        "type": "object",
+        "properties": {
+          "initialConfig": {
+            "$ref": "#/components/schemas/io.github.springwolf.core.controller.UiConfigController.UiConfig.InitialConfig"
+          },
+          "groups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/io.github.springwolf.core.controller.UiConfigController.UiConfig.UiConfigGroup"
+            }
+          }
+        },
+        "title": "UiConfig"
+      },
+      "io.github.springwolf.core.controller.UiConfigController.UiConfig.InitialConfig": {
+        "type": "object",
+        "properties": {
+          "showBindings": {
+            "type": "boolean"
+          },
+          "showHeaders": {
+            "type": "boolean"
+          }
+        },
+        "title": "InitialConfig"
+      },
+      "io.github.springwolf.core.controller.UiConfigController.UiConfig.UiConfigGroup": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "title": "UiConfigGroup"
+      },
+      "de.gematik.zeta.testfachdienst.model.HelloZetaResource": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "title": "HelloZetaResource"
+      }
+    }
+  }
+}

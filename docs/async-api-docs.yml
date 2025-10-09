@@ -1,0 +1,305 @@
+asyncapi: 3.0.0
+info:
+  title: testfachdienst AsyncAPI
+  version: 0.1.0
+  x-generator: springwolf
+defaultContentType: application/json
+servers:
+  ws:
+    host: wss://achelos_testfachdienst.de/ws
+    protocol: stomp
+channels:
+  _queue_erezept:
+    address: /queue/erezept
+    messages:
+      ERezept:
+        $ref: "#/components/messages/ERezept"
+      java.lang.String:
+        $ref: "#/components/messages/java.lang.String"
+      java.util.ListERezept:
+        $ref: "#/components/messages/java.util.ListERezept"
+    bindings:
+      stomp: { }
+  create:
+    address: create
+    messages:
+      ERezept:
+        $ref: "#/components/messages/ERezept"
+    bindings:
+      stomp: { }
+  delete.{id}:
+    address: "delete.{id}"
+    messages:
+      java.lang.Long:
+        $ref: "#/components/messages/java.lang.Long"
+    bindings:
+      stomp: { }
+  list:
+    address: list
+    messages:
+      PayloadNotUsed:
+        $ref: "#/components/messages/PayloadNotUsed"
+    bindings:
+      stomp: { }
+  read.{id}:
+    address: "read.{id}"
+    messages:
+      java.lang.Long:
+        $ref: "#/components/messages/java.lang.Long"
+    bindings:
+      stomp: { }
+  update.{id}:
+    address: "update.{id}"
+    messages:
+      ERezept:
+        $ref: "#/components/messages/ERezept"
+    bindings:
+      stomp: { }
+components:
+  schemas:
+    ERezept:
+      title: Erezept
+      type: object
+      properties:
+        dosage:
+          type: string
+          description: Dosage instructions
+          minLength: 1
+          examples:
+            - "1 tablet, 3× daily after meals"
+        expiresAt:
+          type: string
+          description: When it expires (ISO-8601)
+          format: date-time
+          examples:
+            - 2025-12-31T23:59:59Z
+        id:
+          type: integer
+          description: Unique identifier
+          format: int64
+          examples:
+            - 123
+        issuedAt:
+          type: string
+          description: When it was issued (ISO-8601)
+          format: date-time
+          examples:
+            - 2025-09-22T10:30:00Z
+        medicationName:
+          type: string
+          description: Medication name
+          minLength: 1
+          examples:
+            - Ibuprofen 400 mg
+        patientId:
+          type: string
+          description: FHIR/PKV patient identifier
+          minLength: 1
+          examples:
+            - PAT-123456
+        practitionerId:
+          type: string
+          description: Identifier of prescribing practitioner
+          minLength: 1
+          examples:
+            - PRAC-98765
+        prescriptionId:
+          type: string
+          description: Prescription identifier
+          minLength: 1
+          examples:
+            - RX-2025-000123
+        status:
+          type: string
+          description: Lifecycle states of a prescription
+          enum:
+            - CREATED
+            - SIGNED
+            - DISPENSED
+            - CANCELLED
+            - EXPIRED
+      description: A prescription (ERezept)
+      examples:
+        - dosage: "1 tablet, 3× daily after meals"
+          expiresAt: 2025-12-31T23:59:59Z
+          id: 123
+          issuedAt: 2025-09-22T10:30:00Z
+          medicationName: Ibuprofen 400 mg
+          patientId: PAT-123456
+          practitionerId: PRAC-98765
+          prescriptionId: RX-2025-000123
+          status: CREATED
+      required:
+        - dosage
+        - medicationName
+        - patientId
+        - practitionerId
+        - prescriptionId
+    PayloadNotUsed:
+      title: PayloadNotUsed
+      type: object
+      properties: { }
+      description: No payload specified
+      examples:
+        - { }
+    SpringStompDefaultHeaders:
+      title: SpringStompDefaultHeaders
+      type: object
+      properties: { }
+      examples:
+        - { }
+    java.lang.Long:
+      type: integer
+      format: int64
+      examples:
+        - 0
+    java.lang.String:
+      type: string
+      examples:
+        - '"string"'
+    java.util.ListERezept:
+      type: array
+      examples:
+        - - dosage: "1 tablet, 3× daily after meals"
+            expiresAt: 2025-12-31T23:59:59Z
+            id: 123
+            issuedAt: 2025-09-22T10:30:00Z
+            medicationName: Ibuprofen 400 mg
+            patientId: PAT-123456
+            practitionerId: PRAC-98765
+            prescriptionId: RX-2025-000123
+            status: CREATED
+      items:
+        $ref: "#/components/schemas/ERezept"
+  messages:
+    ERezept:
+      headers:
+        $ref: "#/components/schemas/SpringStompDefaultHeaders"
+      payload:
+        schemaFormat: application/vnd.aai.asyncapi+json;version=3.0.0
+        schema:
+          $ref: "#/components/schemas/ERezept"
+      name: ERezept
+      title: ERezept
+      bindings:
+        stomp: { }
+    PayloadNotUsed:
+      headers:
+        $ref: "#/components/schemas/SpringStompDefaultHeaders"
+      payload:
+        schemaFormat: application/vnd.aai.asyncapi+json;version=3.0.0
+        schema:
+          title: PayloadNotUsed
+          type: object
+          properties: { }
+          description: No payload specified
+      name: PayloadNotUsed
+      title: PayloadNotUsed
+      bindings:
+        stomp: { }
+    java.lang.Long:
+      headers:
+        $ref: "#/components/schemas/SpringStompDefaultHeaders"
+      payload:
+        schemaFormat: application/vnd.aai.asyncapi+json;version=3.0.0
+        schema:
+          type: integer
+          format: int64
+          examples:
+            - 0
+      name: java.lang.Long
+      title: long
+      bindings:
+        stomp: { }
+    java.lang.String:
+      headers:
+        $ref: "#/components/schemas/SpringStompDefaultHeaders"
+      payload:
+        schemaFormat: application/vnd.aai.asyncapi+json;version=3.0.0
+        schema:
+          type: string
+          examples:
+            - '"string"'
+      name: java.lang.String
+      title: string
+      bindings:
+        stomp: { }
+    java.util.ListERezept:
+      headers:
+        $ref: "#/components/schemas/SpringStompDefaultHeaders"
+      payload:
+        schemaFormat: application/vnd.aai.asyncapi+json;version=3.0.0
+        schema:
+          type: array
+          examples:
+            - - dosage: "1 tablet, 3× daily after meals"
+                expiresAt: 2025-12-31T23:59:59Z
+                id: 123
+                issuedAt: 2025-09-22T10:30:00Z
+                medicationName: Ibuprofen 400 mg
+                patientId: PAT-123456
+                practitionerId: PRAC-98765
+                prescriptionId: RX-2025-000123
+                status: CREATED
+          items:
+            $ref: "#/components/schemas/ERezept"
+      name: java.util.ListERezept
+      title: ListERezept
+      bindings:
+        stomp: { }
+operations:
+  create_receive_create:
+    action: receive
+    channel:
+      $ref: "#/channels/create"
+    bindings:
+      stomp: { }
+    messages:
+      - $ref: "#/channels/create/messages/ERezept"
+  delete.{id}_receive_delete:
+    action: receive
+    channel:
+      $ref: "#/channels/delete.{id}"
+    bindings:
+      stomp: { }
+    messages:
+      - $ref: "#/channels/delete.{id}/messages/java.lang.Long"
+    reply:
+      channel:
+        $ref: "#/channels/_queue_erezept"
+      messages:
+        - $ref: "#/channels/_queue_erezept/messages/java.lang.String"
+  list_receive_list:
+    action: receive
+    channel:
+      $ref: "#/channels/list"
+    bindings:
+      stomp: { }
+    messages:
+      - $ref: "#/channels/list/messages/PayloadNotUsed"
+    reply:
+      channel:
+        $ref: "#/channels/_queue_erezept"
+      messages:
+        - $ref: "#/channels/_queue_erezept/messages/java.util.ListERezept"
+  read.{id}_receive_read:
+    action: receive
+    channel:
+      $ref: "#/channels/read.{id}"
+    bindings:
+      stomp: { }
+    messages:
+      - $ref: "#/channels/read.{id}/messages/java.lang.Long"
+    reply:
+      channel:
+        $ref: "#/channels/_queue_erezept"
+      messages:
+        - $ref: "#/channels/_queue_erezept/messages/ERezept"
+  update.{id}_receive_update:
+    action: receive
+    channel:
+      $ref: "#/channels/update.{id}"
+    bindings:
+      stomp: { }
+    messages:
+      - $ref: "#/channels/update.{id}/messages/ERezept"

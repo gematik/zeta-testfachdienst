@@ -1,0 +1,101 @@
+stages:
+  - lint
+  - test
+  - build
+  - publish
+
+default:
+  image: gradle:jdk21-alpine
+  cache:
+    key: "$CI_PROJECT_PATH-slug"
+    paths:
+      - .gradle/
+      - ~/.gradle/caches/
+      - ~/.gradle/wrapper/
+
+variables:
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+  PACKAGE_NAME: "fat-jar"
+  ## settings for harbor container registry
+  CONTAINER_REGISTRY_SERVER: $CI_REGISTRY
+  CONTAINER_REGISTRY_PROJECT: zeta-testsuite
+  CONTAINER_REGISTRY_URL: $CI_REGISTRY_IMAGE
+  CONTAINER_REGISTRY_USER: $CI_REGISTRY_USER
+  CONTAINER_REGISTRY_PASSWORD: $CI_REGISTRY_PASSWORD
+  TAG: "${CI_COMMIT_TAG:-$CI_COMMIT_SHORT_SHA}"
+
+lint:
+  stage: lint
+  script:
+    - gradle --no-daemon --scan --stacktrace checkstyleMain checkstyleTest
+  artifacts:
+    paths:
+      - build/reports/checkstyle/
+    expire_in: 1 week
+
+test:
+  stage: test
+  script:
+    - gradle --no-daemon -scan --stacktrace test
+  artifacts:
+    when: always
+    reports:
+      junit: build/test-results/test/*.xml
+    paths:
+      - build/reports/tests/
+    expire_in: 1 week
+
+build-jar:
+  stage: build
+  needs: [ "test" ]
+  script:
+    - gradle --no-daemon clean bootJar
+  artifacts:
+    paths:
+      - build/libs/*.jar
+    expire_in: 1 week
+
+publish-jar:
+  stage: publish
+  image: curlimages/curl:latest
+  dependencies:
+    - build-jar
+  script:
+    - JAR_FILE=$(ls build/libs/*.jar | head -n1)
+
+    - sha256sum "$JAR_FILE" | awk '{print $1}' > "${JAR_FILE}.sha256"
+    - SHA256="$(cat "${JAR_FILE}.sha256")"
+
+    - |
+      curl --fail --show-error --silent --retry 3 --retry-delay 2
+      --header "JOB-TOKEN: ${CI_JOB_TOKEN}"
+      --header "Content-Type: application/java-archive"
+      --upload-file "$JAR_FILE"
+      "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PACKAGE_NAME}/${TAG}/${JAR_NAME}"
+
+    - |
+      curl --fail --show-error --silent --retry 3 --retry-delay 2
+      --header "JOB-TOKEN: ${CI_JOB_TOKEN}"
+      --header "Content-Type: text/plain"
+      --upload-file "${JAR_FILE}.sha256"
+      "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PACKAGE_NAME}/${VERSION}/${JAR_NAME}.sha256"
+
+  rules:
+    - if: '$CI_COMMIT_TAG'
+      when: on_success
+    - when: never
+
+publish-image:
+  stage: publish
+  needs: [ "build-jar" ]
+  script:
+    - gradle --no-configuration-cache jib
+      -Djib.to.image="${CI_REGISTRY_IMAGE}:${TAG}"
+      -Djib.to.auth.username="${CI_REGISTRY_USER}"
+      -Djib.to.auth.password="${CI_REGISTRY_PASSWORD}"
+  rules:
+    - if: '$CI_COMMIT_TAG'
+      when: on_success
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: on_success
+    - when: never
