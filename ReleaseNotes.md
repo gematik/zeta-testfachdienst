@@ -2,6 +2,11 @@
 
 # Release Notes ZETA Testfachdienst
 
+## Release 0.2.1
+
+### added:
+- Support for WebSockets
+
 ## Release 0.1.3
 
 ### added:

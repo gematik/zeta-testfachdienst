@@ -21,6 +21,7 @@
  * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
  * #L%
  */
+
 package de.gematik.zeta.testfachdienst.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,6 +36,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+/**
+ * Unit tests for {@link HelloZetaController}.
+ */
 @ExtendWith(MockitoExtension.class)
 class HelloZetaControllerTest {
 
@@ -44,6 +48,9 @@ class HelloZetaControllerTest {
   @InjectMocks
   private HelloZetaController controller;
 
+  /**
+   * Verifies that the controller delegates to the service and returns the greeting payload.
+   */
   @Test
   void getHelloZetaResponse_returnsServicePayload() {
     var resource = new HelloZetaResource("Hello");

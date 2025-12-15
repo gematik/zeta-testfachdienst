@@ -21,14 +21,21 @@
  * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
  * #L%
  */
+
 package de.gematik.zeta.testfachdienst.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
+/**
+ * Unit tests for {@link HelloZetaResource}.
+ */
 class HelloZetaResourceTest {
 
+  /**
+   * Verifies the default constructor allows setting the message via setter.
+   */
   @Test
   void defaultConstructor_allowsSettingMessage() {
     var resource = new HelloZetaResource();
@@ -37,6 +44,9 @@ class HelloZetaResourceTest {
     assertThat(resource.getMessage()).isEqualTo("Hello");
   }
 
+  /**
+   * Ensures the parameterized constructor initializes the message field.
+   */
   @Test
   void parameterConstructor_initializesMessage() {
     var resource = new HelloZetaResource("Hi there");

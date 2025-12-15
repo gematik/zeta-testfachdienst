@@ -10,11 +10,15 @@ default:
     key: "$CI_PROJECT_PATH-slug"
     paths:
       - .gradle/
-      - ~/.gradle/caches/
-      - ~/.gradle/wrapper/
+  # Keep the Gradle wrapper and caches inside the project directory for reuse across jobs.
+  before_script:
+    - export GRADLE_USER_HOME="$CI_PROJECT_DIR/.gradle"
+    # The Docker image ships without execute permissions on scripts; fix this before running the wrapper.
+    - chmod +x gradlew
 
 variables:
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+  GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle"
   PACKAGE_NAME: "fat-jar"
   ## settings for harbor container registry
   CONTAINER_REGISTRY_SERVER: $CI_REGISTRY
@@ -26,8 +30,10 @@ variables:
 
 lint:
   stage: lint
+  dependencies: []
   script:
-    - gradle --no-daemon --scan --stacktrace checkstyleMain checkstyleTest
+    # Gradle Checkstyle tasks fail the job when violations exist (see build.gradle.kts Checkstyle setup).
+    - ./gradlew --no-daemon --stacktrace checkstyleMain checkstyleTest
   artifacts:
     paths:
       - build/reports/checkstyle/
@@ -35,8 +41,10 @@ lint:
 
 test:
   stage: test
+  needs: [ "lint" ]
+  dependencies: []
   script:
-    - gradle --no-daemon -scan --stacktrace test
+    - ./gradlew --no-daemon --stacktrace test
   artifacts:
     when: always
     reports:
@@ -48,21 +56,31 @@ test:
 build-jar:
   stage: build
   needs: [ "test" ]
+  dependencies: []
   script:
-    - gradle --no-daemon clean bootJar
+    - ./gradlew --no-daemon clean bootJar
   artifacts:
     paths:
       - build/libs/*.jar
     expire_in: 1 week
+  rules:
+    - if: '$CI_COMMIT_TAG'
+      when: on_success
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: on_success
+    - when: never
 
 publish-jar:
   stage: publish
   image: curlimages/curl:latest
+  needs: [ "build-jar" ]
   dependencies:
     - build-jar
   script:
+    - TAG="${CI_COMMIT_TAG:-${CI_COMMIT_SHORT_SHA:-${CI_COMMIT_REF_SLUG}}}"
     - JAR_FILE=$(ls build/libs/*.jar | head -n1)
-
+    - JAR_NAME=$(basename "${JAR_FILE}")
+    - VERSION="${TAG}"
     - sha256sum "$JAR_FILE" | awk '{print $1}' > "${JAR_FILE}.sha256"
     - SHA256="$(cat "${JAR_FILE}.sha256")"
 
@@ -88,8 +106,10 @@ publish-jar:
 publish-image:
   stage: publish
   needs: [ "build-jar" ]
+  dependencies: []
   script:
-    - gradle --no-configuration-cache jib
+    - TAG="${CI_COMMIT_TAG:-${CI_COMMIT_SHORT_SHA:-${CI_COMMIT_REF_SLUG}}}"
+    - ./gradlew --no-configuration-cache jib
       -Djib.to.image="${CI_REGISTRY_IMAGE}:${TAG}"
       -Djib.to.auth.username="${CI_REGISTRY_USER}"
       -Djib.to.auth.password="${CI_REGISTRY_PASSWORD}"

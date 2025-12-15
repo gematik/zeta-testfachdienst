@@ -21,15 +21,16 @@
  * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
  * #L%
  */
+
 package de.gematik.zeta.testfachdienst.controller;
 
 import de.gematik.zeta.testfachdienst.model.Erezept;
 import de.gematik.zeta.testfachdienst.service.ErezeptService;
 import jakarta.validation.Valid;
-import java.net.URI;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,6 +40,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * REST controller that exposes CRUD operations for {@link Erezept} resources.
@@ -46,10 +48,24 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/erezept")
 @Slf4j
-@RequiredArgsConstructor
 public class ErezeptController {
 
   private final ErezeptService service;
+
+  private final String servletContextPath;
+
+  /**
+   * Creates the E-Rezept controller with injected dependencies.
+   *
+   * @param service service layer for prescription handling
+   * @param servletContextPath optional servlet context path prefix
+   */
+  public ErezeptController(
+      ErezeptService service,
+      @Value("${server.servlet.context-path:}") String servletContextPath) {
+    this.service = service;
+    this.servletContextPath = servletContextPath;
+  }
 
   /**
    * Return all stored electronic prescriptions.
@@ -98,7 +114,7 @@ public class ErezeptController {
    * Persist a new electronic prescription.
    *
    * @param req request payload representing the prescription to save
-   * @return HTTP 201 with location header when created, 400 on duplicate identifiers
+   * @return HTTP 201 with location header when created, 409 on duplicate identifiers
    */
   @PostMapping
   public ResponseEntity<?> create(@Valid @RequestBody Erezept req) {
@@ -106,10 +122,31 @@ public class ErezeptController {
     var created = service.create(req);
     if (created.isEmpty()) {
       log.warn("Duplicate prescriptionId={}", req.getPrescriptionId());
-      return ResponseEntity.badRequest().body("PrescriptionId already exists");
+      return ResponseEntity.status(HttpStatus.CONFLICT).body("PrescriptionId already exists");
     }
     Erezept saved = created.get();
-    return ResponseEntity.created(URI.create("/api/erezept/" + saved.getId())).body(saved);
+    String contextPath = normalizeContextPath(servletContextPath);
+    var location = UriComponentsBuilder.fromPath(contextPath)
+        .path("/api/erezept/{id}")
+        .buildAndExpand(saved.getId())
+        .toUri();
+    return ResponseEntity.created(location).body(saved);
+  }
+
+  /**
+   * Normalize the configured servlet context path so it can be prefixed to generated locations.
+   *
+   * @param contextPath raw context path from configuration (may be null or blank)
+   * @return normalized context path starting with {@code /} and without trailing slash
+   */
+  private String normalizeContextPath(String contextPath) {
+    if (contextPath == null || contextPath.isBlank() || "/".equals(contextPath)) {
+      return "";
+    }
+    if (!contextPath.startsWith("/")) {
+      contextPath = "/" + contextPath;
+    }
+    return contextPath.endsWith("/") ? contextPath.substring(0, contextPath.length() - 1) : contextPath;
   }
 
   /**
