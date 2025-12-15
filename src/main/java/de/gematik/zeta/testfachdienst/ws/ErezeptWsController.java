@@ -21,15 +21,17 @@
  * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
  * #L%
  */
+
 package de.gematik.zeta.testfachdienst.ws;
 
 import de.gematik.zeta.testfachdienst.model.Erezept;
 import de.gematik.zeta.testfachdienst.model.ErezeptStatus;
 import de.gematik.zeta.testfachdienst.service.ErezeptService;
 import jakarta.validation.Valid;
-import java.time.OffsetDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -64,10 +66,16 @@ import org.springframework.web.server.ResponseStatusException;
  */
 @Controller
 @RequiredArgsConstructor
+@Slf4j
+@SuppressWarnings("unused") // invoked via STOMP @MessageMapping endpoints
 public class ErezeptWsController {
+
+  private static final String EREZEPT_TOPIC_SUFFIX = "/erezept";
 
   private final ErezeptService service;
   private final SimpMessagingTemplate broker;
+  @Value("${server.servlet.context-path:}")
+  private String contextPath;
 
   /**
    * Create a new prescription and broadcast it to all subscribers on /topic/erezept.
@@ -78,13 +86,16 @@ public class ErezeptWsController {
    *   <li>If a {@code prescriptionId} already exists → 409 CONFLICT</li>
    * </ul>
    *
-   * <p>On success, sets {@code status=CREATED} and {@code issuedAt=now}, persists,
+   * <p>On success, sets {@code status=CREATED}, persists with the provided values,
    * then broadcasts the created entity.</p>
    *
    * @param request new prescription payload
    */
-  @MessageMapping("create")
-  public void create(@Payload @Valid Erezept request) {
+  @MessageMapping("erezept.create")
+  @SendToUser("/queue/erezept")
+  public Erezept create(@Payload @Valid Erezept request) {
+    log.info("STOMP erezept.create request received for prescriptionId={}",
+        request.getPrescriptionId());
     if (request.getId() != null && service.existsById(request.getId())) {
       throw new ResponseStatusException(
           HttpStatus.CONFLICT,
@@ -94,14 +105,14 @@ public class ErezeptWsController {
         request.getPrescriptionId())) {
       throw new ResponseStatusException(
           HttpStatus.CONFLICT,
-          "ERezept already exists for prescriptionId=%s".formatted(request.getPrescriptionId()));
+          "ERezept with prescriptionId=%s already exists".formatted(request.getPrescriptionId()));
     }
 
     var toSave = Erezept.builder()
         .id(null) // let the DB generate it
         .medicationName(request.getMedicationName())
         .dosage(request.getDosage())
-        .issuedAt(OffsetDateTime.now())
+        .issuedAt(request.getIssuedAt())
         .expiresAt(request.getExpiresAt())
         .patientId(request.getPatientId())
         .practitionerId(request.getPractitionerId())
@@ -111,7 +122,11 @@ public class ErezeptWsController {
 
     var created = service.save(toSave);
 
-    broker.convertAndSend("/topic/erezept", created);
+    var broadcastDestination = brokerTopic();
+    log.info("STOMP erezept.create persisted id={}, broadcasting to {}", created.getId(),
+        broadcastDestination);
+    broker.convertAndSend(broadcastDestination, created);
+    return created;
   }
 
   /**
@@ -121,9 +136,10 @@ public class ErezeptWsController {
    *
    * @return list of prescriptions
    */
-  @MessageMapping("list")
+  @MessageMapping("erezept.list")
   @SendToUser("/queue/erezept")
   public List<Erezept> list() {
+    log.info("STOMP erezept.list request received");
     return service.findAll();
   }
 
@@ -136,12 +152,13 @@ public class ErezeptWsController {
    * @return the found prescription
    * @throws ResponseStatusException 404 if not found
    */
-  @MessageMapping("read.{id}")
+  @MessageMapping("erezept.read.{id}")
   @SendToUser("/queue/erezept")
   public Erezept read(@DestinationVariable Long id) {
+    log.info("STOMP erezept.read request received for id={}", id);
     return service.findById(id)
         .orElseThrow(() -> new ResponseStatusException(
-            HttpStatus.NOT_FOUND, "ERezept not found for id=" + id));
+            HttpStatus.NOT_FOUND, "ERezept with id=%d not found".formatted(id)));
   }
 
   /**
@@ -150,18 +167,20 @@ public class ErezeptWsController {
    * @param id      identifier of the prescription to update
    * @param request new values (validated)
    */
-  @MessageMapping("update.{id}")
-  public void update(@DestinationVariable Long id, @Payload @Valid Erezept request) {
+  @MessageMapping("erezept.update.{id}")
+  @SendToUser("/queue/erezept")
+  public Erezept update(@DestinationVariable Long id, @Payload @Valid Erezept request) {
+    log.info("STOMP erezept.update request received for id={}", id);
     var existing = service.findById(id)
         .orElseThrow(() -> new ResponseStatusException(
-            HttpStatus.NOT_FOUND, "ERezept not found for id=" + id));
+            HttpStatus.NOT_FOUND, "ERezept with id=%d not found".formatted(id)));
 
     if (request.getPrescriptionId() != null
         && !request.getPrescriptionId().equals(existing.getPrescriptionId())
         && service.existsByPrescriptionId(request.getPrescriptionId())) {
       throw new ResponseStatusException(
           HttpStatus.CONFLICT,
-          "ERezept already exists for prescriptionId=%s".formatted(request.getPrescriptionId()));
+          "ERezept with prescriptionId=%s already exists".formatted(request.getPrescriptionId()));
     }
 
     var updated = Erezept.builder()
@@ -176,26 +195,52 @@ public class ErezeptWsController {
         .status(request.getStatus() != null ? request.getStatus() : existing.getStatus())
         .build();
 
-    service.save(updated);
+    var saved = service.save(updated);
 
-    broker.convertAndSend("/topic/erezept", updated);
+    var broadcastDestination = brokerTopic();
+    log.info("STOMP erezept.update persisted id={}, broadcasting to {}", updated.getId(),
+        broadcastDestination);
+    broker.convertAndSend(broadcastDestination, saved);
+    return saved;
   }
 
   /**
-   * Delete a prescription by id and return a simple acknowledgement to the user.
+   * Delete a prescription by id and return a confirmation response to the user.
    *
    * <p>Reply destination: /user/queue/erezept</p>
    *
    * @param id identifier of the prescription to delete
-   * @return textual acknowledgement: "deleted" or "not_found"
+   * @return confirmation object with id and status
+   * @throws ResponseStatusException 404 if not found
    */
-  @MessageMapping("delete.{id}")
+  @MessageMapping("erezept.delete.{id}")
   @SendToUser("/queue/erezept")
-  public String delete(@DestinationVariable Long id) {
-    if (service.existsById(id)) {
-      service.deleteById(id);
-      return "deleted";
+  public java.util.Map<String, Object> delete(@DestinationVariable Long id) {
+    log.info("STOMP erezept.delete request received for id={}", id);
+    if (!service.existsById(id)) {
+      throw new ResponseStatusException(
+          HttpStatus.NOT_FOUND, "ERezept with id=%d not found".formatted(id));
     }
-    return "not_found";
+    service.deleteById(id);
+    log.info("STOMP erezept.delete removed id={}", id);
+    return java.util.Map.of("id", id, "status", "deleted");
+  }
+
+  /**
+   * Build the broker topic destination, respecting an optional servlet context path.
+   *
+   * @return topic destination string such as {@code /topic/erezept} or with context prefix
+   */
+  private String brokerTopic() {
+    var destination = "/topic" + EREZEPT_TOPIC_SUFFIX;
+    if (contextPath == null || contextPath.isBlank()) {
+      return destination;
+    }
+
+    String normalizedContext = contextPath.startsWith("/") ? contextPath : "/" + contextPath;
+    if (normalizedContext.endsWith("/")) {
+      normalizedContext = normalizedContext.substring(0, normalizedContext.length() - 1);
+    }
+    return normalizedContext + destination;
   }
 }

@@ -21,6 +21,7 @@
  * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
  * #L%
  */
+
 package de.gematik.zeta.testfachdienst.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,8 +29,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.OffsetDateTime;
 import org.junit.jupiter.api.Test;
 
+/**
+ * Unit tests for {@link Erezept}.
+ */
 class ErezeptTest {
 
+  /**
+   * Ensures the builder defaults the status to CREATED when not provided.
+   */
   @Test
   void builderDefaultStatus_isCreated() {
     var prescription = Erezept.builder()

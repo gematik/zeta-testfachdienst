@@ -21,6 +21,7 @@
  * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
  * #L%
  */
+
 package de.gematik.zeta.testfachdienst.config;
 
 import io.github.springwolf.core.asyncapi.scanners.common.payload.PayloadMethodReturnService;
@@ -36,6 +37,7 @@ import org.springframework.context.annotation.Primary;
  * schema generation uses the generic return type of controller methods.
  */
 @Configuration
+@SuppressWarnings("unused") // instantiated by Spring's component scan
 public class SpringwolfPayloadConfig {
 
   /**
@@ -50,6 +52,12 @@ public class SpringwolfPayloadConfig {
   public PayloadMethodReturnService genericAwarePayloadMethodReturnService(
       PayloadService payloadService) {
     return new PayloadMethodReturnService(payloadService) {
+      /**
+       * Build a payload schema using the method's generic return type instead of the raw class.
+       *
+       * @param method controller method being inspected
+       * @return schema object derived from the generic return type
+       */
       @Override
       public PayloadSchemaObject extractSchema(Method method) {
         return payloadService.buildSchema(method.getGenericReturnType());

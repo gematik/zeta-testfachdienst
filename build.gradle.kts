@@ -43,10 +43,19 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("org.springframework.boot:spring-boot-starter-websocket")
+    implementation("org.springframework:spring-websocket")
     implementation("org.springframework.boot:spring-boot-starter-json")
     implementation(libs.springdoc)
     implementation(libs.springwolfstomp)
     implementation(libs.springwolfstompbinding)
+
+    implementation(platform(libs.opentelemetrybom))
+    implementation("io.opentelemetry:opentelemetry-exporter-otlp")
+    implementation("io.opentelemetry:opentelemetry-sdk-testing")
+
+    implementation(libs.protobuf)
+    implementation(libs.jobrunr)
+
 
     runtimeOnly(libs.springwolfui)
     runtimeOnly("com.h2database:h2")
@@ -56,11 +65,9 @@ dependencies {
 
 checkstyle {
     toolVersion = libs.versions.checkstyle.get()
-    val archive =
-        configurations.checkstyle.get().resolve().filter {
-            it.name.startsWith("checkstyle")
-        }
-    config = resources.text.fromArchiveEntry(archive, "google_checks.xml")
+    config = resources.text.fromFile(file("config/checkstyle/custom_google_checks.xml"))
+    isIgnoreFailures = false
+    maxWarnings = 0
 }
 
 jacoco {
@@ -109,10 +116,6 @@ extensions.configure<JibExtension>("jib") {
         ports = listOf("8080", "8081")
         user = "65532:65532"
         creationTime = "USE_CURRENT_TIMESTAMP"
-        environment =
-            mapOf(
-                "SPRING_PROFILES_ACTIVE" to "prod,k8s",
-            )
         workingDirectory = "/app"
         labels =
             mapOf(

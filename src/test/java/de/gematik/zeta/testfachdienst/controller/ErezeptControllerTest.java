@@ -21,6 +21,7 @@
  * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
  * #L%
  */
+
 package de.gematik.zeta.testfachdienst.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,10 +42,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  * Unit tests for {@link ErezeptController}.
-  */
+ */
 @ExtendWith(MockitoExtension.class)
 class ErezeptControllerTest {
 
@@ -56,6 +58,9 @@ class ErezeptControllerTest {
 
   private Erezept sample;
 
+  /**
+   * Prepare a reusable sample prescription for test interactions.
+   */
   @BeforeEach
   void setUp() {
     sample = Erezept.builder()
@@ -146,6 +151,23 @@ class ErezeptControllerTest {
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
     assertThat(response.getHeaders().getLocation()).isEqualTo(URI.create("/api/erezept/1"));
+    assertThat(response.getBody()).isEqualTo(created);
+    verify(service).create(toPersist);
+  }
+
+  /**
+   * Verifies the Location header includes the servlet context path when configured.
+   */
+  @Test
+  void create_includesContextPathInLocation() {
+    var toPersist = Erezept.builder().id(null).prescriptionId("RX-NEW").build();
+    var created = Erezept.builder().id(1L).prescriptionId("RX-NEW").build();
+    when(service.create(toPersist)).thenReturn(Optional.of(created));
+    ReflectionTestUtils.setField(controller, "servletContextPath", "/achelos_testfachdienst");
+
+    var response = controller.create(toPersist);
+
+    assertThat(response.getHeaders().getLocation()).isEqualTo(URI.create("/achelos_testfachdienst/api/erezept/1"));
     assertThat(response.getBody()).isEqualTo(created);
     verify(service).create(toPersist);
   }

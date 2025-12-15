@@ -21,6 +21,7 @@
  * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
  * #L%
  */
+
 package de.gematik.zeta.testfachdienst.service;
 
 import de.gematik.zeta.testfachdienst.model.Erezept;
@@ -85,8 +86,8 @@ public class ErezeptService {
   /**
    * Update an existing prescription by applying the provided changes.
    *
-   * @param id          identifier of the prescription to update
-   * @param updateData  new field values
+   * @param id         identifier of the prescription to update
+   * @param updateData new field values
    * @return updated entity when present, empty optional when missing
    */
   public Optional<Erezept> update(Long id, Erezept updateData) {

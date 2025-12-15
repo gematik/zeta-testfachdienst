@@ -195,17 +195,20 @@ viewable in a small bundled UI.
     - ``wss://<host>:<port>/achelos_testfachdienst/ws`` (HTTPS mode)
     - ``ws://<host>:<port>/achelos_testfachdienst/ws`` (HTTP mode)
 
-- Application prefix (SEND here): ``/app``
+- Application prefix (SEND here): ``/<context-path>/app`` (default context path:
+  ``/achelos_testfachdienst``). If no servlet context path is configured, use ``/app``.
     - Example client destinations:
-        - ``/app/erezept.create`` - create and broadcast
-        - ``/app/erezept.read.{id}`` - fetch one and reply to caller
-        - ``/app/erezept.update.{id}`` - update and broadcast
-        - ``/app/erezept.delete.{id}`` - delete and ack to caller
-        - ``/app/erezept.list`` - list and reply to caller
+        - ``/achelos_testfachdienst/app/erezept.create`` - create and broadcast
+        - ``/achelos_testfachdienst/app/erezept.read.{id}`` - fetch one and reply to caller
+        - ``/achelos_testfachdienst/app/erezept.update.{id}`` - update and broadcast
+        - ``/achelos_testfachdienst/app/erezept.delete.{id}`` - delete and ack to caller
+        - ``/achelos_testfachdienst/app/erezept.list`` - list and reply to caller
 
 - Broker prefixes (SUBSCRIBE here):
-    - Broadcasts: ``/topic/erezept``
-    - Per-user replies: ``/user/queue/erezept``
+    - Broadcasts: ``/achelos_testfachdienst/topic/erezept`` (or ``/topic/erezept`` when no context path
+      is set)
+    - Per-user replies: ``/achelos_testfachdienst/user/queue/erezept`` (or ``/user/queue/erezept`` without
+      a context path)
 
 ### AsyncAPI (code-first) docs
 
@@ -219,40 +222,6 @@ For unambiguous schemas,
 we pin payload types with ``@AsyncMessage(payload = ERezept.class)`` or ``ERezept[].class`` for list
 responses.
 
-### Minimal client (JS) example
-
-```html
-
-<script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
-<script>
-  const sock = new SockJS('/achelos_testfachdienst/ws');
-  const stomp = Stomp.over(sock);
-
-  stomp.connect({}, () => {
-    // Subscribe to broadcasts
-    stomp.subscribe('/topic/erezept', msg => {
-      console.log('Broadcast:', JSON.parse(msg.body));
-    });
-
-    // Subscribe to per-user replies
-    stomp.subscribe('/user/queue/erezept', msg => {
-      console.log('Direct reply:', JSON.parse(msg.body));
-    });
-
-    // Create a new ERezept (adjust fields to your model)
-    stomp.send('/app/erezept.create', {}, JSON.stringify({
-      id: null,
-      prescriptionId: 'RX-12345',
-      status: 'CREATED'
-    }));
-
-    // Fetch a single ERezept
-    stomp.send('/app/erezept.read.1', {}, {});
-  }, (err) => console.error('STOMP error', err));
-</script>
-```
-
 ### cURL quick checks (spec & UI)
 
 ```bash
@@ -265,6 +234,28 @@ curl -k https://localhost:8080/achelos_testfachdienst/springwolf/asyncapi-ui.htm
 
 > When running via ``./gradlew bootRun``, HTTPS is enabled by default in this project;
 > use ``-k/--insecure`` for local self-signed certs.
+
+## Exemplary self disclosure export 
+This service allows to configure an OTLP based export of a self disclosure log record (see A_27494-01, gemSpec_ZETA)
+using the official [OpenTelemetry SDK](https://opentelemetry.io/docs/languages/java/intro/) to generate and export
+OTLP and gemSpec_ZETA conformant log records and [Jobrunr](https://www.jobrunr.io/) to manage the recurring background 
+task.
+
+The configuration parameters for the OTLP exporter are located at the `otlp` key in the 
+[application.yaml](./src/main/resources/application.yml).
+For convenience all of those options can also be configured through their respective environment variables, please 
+consult the [application.yaml](./src/main/resources/application.yml) for details.
+
+
+The configuration parameters for the - more or less - static values of the self disclosure are located at the 
+`selfdisclosure` key in the [application.yaml](./src/main/resources/application.yml).
+
+The configuration parameters for the `jobrunr` values are located at the `jobrunr` key in the
+[application.yaml](./src/main/resources/application.yml).
+Please consult the [Jobruner documentation](https://www.jobrunr.io/en/documentation/configuration/spring/) for details 
+on how to configure `jobrunr`.
+
+
 
 ## Quality Tooling
 
@@ -322,5 +313,6 @@ the License.
 2. Permission notice: Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
     1. The copyright notice (Item 1) and the permission notice (Item 2) shall be included in all copies or substantial portions of the Software.
     2. The software is provided "as is" without warranty of any kind, either express or implied, including, but not limited to, the warranties of fitness for a particular purpose, merchantability, and/or non-infringement. The authors or copyright holders shall not be liable in any manner whatsoever for any damages or other claims arising from, out of or in connection with the software or the use or other dealings with the software, whether in an action of contract, tort, or otherwise.
-    3. We take open source license compliance very seriously. We are always striving to achieve compliance at all times and to improve our processes. If you find any issues or have any suggestions or comments, or if you see any other ways in which we can improve, please reach out to: ospo@gematik.de
-3. Please note: Parts of this code may have been generated using AI-supported technology. Please take this into account, especially when troubleshooting, for security analyses and possible adjustments.
+    3. The software is the result of research and development activities, therefore not necessarily quality assured and without the character of a liable product. For this reason, gematik does not provide any support or other user assistance (unless otherwise stated in individual cases and without justification of a legal obligation). Furthermore, there is no claim to further development and adaptation of the results to a more current state of the art.
+3. Gematik may remove published results temporarily or permanently from the place of publication at any time without prior notice or justification.
+4. Please note: Parts of this code may have been generated using AI-supported technology. Please take this into account, especially when troubleshooting, for security analyses and possible adjustments.

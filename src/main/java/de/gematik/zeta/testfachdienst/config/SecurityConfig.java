@@ -21,6 +21,7 @@
  * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
  * #L%
  */
+
 package de.gematik.zeta.testfachdienst.config;
 
 import org.springframework.context.annotation.Bean;
@@ -34,8 +35,8 @@ import org.springframework.security.web.SecurityFilterChain;
 /**
  * SecurityConfig configures the Spring Security filter chain and supporting beans.
  *
- * <p>The configuration keeps the H2 console usable in development and leaves all endpoints publicly
- * accessible.
+ * <p>The configuration keeps the H2 console usable in development and leaves all endpoints
+ * publicly accessible.
  */
 @Configuration
 public class SecurityConfig {

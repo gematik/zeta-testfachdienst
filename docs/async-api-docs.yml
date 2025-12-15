@@ -20,36 +20,36 @@ channels:
         $ref: "#/components/messages/java.util.ListERezept"
     bindings:
       stomp: { }
-  create:
-    address: create
+  erezept.create:
+    address: erezept.create
     messages:
       ERezept:
         $ref: "#/components/messages/ERezept"
     bindings:
       stomp: { }
-  delete.{id}:
-    address: "delete.{id}"
+  "erezept.delete.{id}":
+    address: "erezept.delete.{id}"
     messages:
       java.lang.Long:
         $ref: "#/components/messages/java.lang.Long"
     bindings:
       stomp: { }
-  list:
-    address: list
+  erezept.list:
+    address: erezept.list
     messages:
       PayloadNotUsed:
         $ref: "#/components/messages/PayloadNotUsed"
     bindings:
       stomp: { }
-  read.{id}:
-    address: "read.{id}"
+  "erezept.read.{id}":
+    address: "erezept.read.{id}"
     messages:
       java.lang.Long:
         $ref: "#/components/messages/java.lang.Long"
     bindings:
       stomp: { }
-  update.{id}:
-    address: "update.{id}"
+  "erezept.update.{id}":
+    address: "erezept.update.{id}"
     messages:
       ERezept:
         $ref: "#/components/messages/ERezept"

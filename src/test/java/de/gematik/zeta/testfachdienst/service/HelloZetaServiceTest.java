@@ -21,6 +21,7 @@
  * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
  * #L%
  */
+
 package de.gematik.zeta.testfachdienst.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,6 +35,9 @@ class HelloZetaServiceTest {
 
   private final HelloZetaService service = new HelloZetaService();
 
+  /**
+   * Ensures the service returns the default greeting message.
+   */
   @Test
   void getHelloZetaResource_returnsDefaultMessage() {
     var resource = service.getHelloZetaResource();

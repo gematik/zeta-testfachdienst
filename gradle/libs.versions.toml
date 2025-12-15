@@ -2,19 +2,25 @@
 spring-boot = "3.5.5"
 spring-dependency-management = "1.1.7"
 springdoc = "2.8.13"
-springwolf = "1.17.0"
-freefair-lombok = "9.0.0-rc2"
+springwolf = "1.19.0"
+freefair-lombok = "9.0.0"
 lombok = "1.18.42"
-checkstyle = "11.0.1"
+checkstyle = "12.1.1"
 jacoco = "0.8.12"
 versions = "0.53.0"
 jib = "3.4.5"
+opentelemetry-bom = "1.56.0"
+protobuf = "4.33.1"
+jobrunr = "8.3.0"
 
 [libraries]
 springdoc = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
 springwolfstomp = { module = "io.github.springwolf:springwolf-stomp", version.ref = "springwolf" }
 springwolfstompbinding = { module = "io.github.springwolf:springwolf-stomp-binding", version.ref = "springwolf" }
 springwolfui = { module = "io.github.springwolf:springwolf-ui", version.ref = "springwolf" }
+opentelemetrybom = { module = "io.opentelemetry:opentelemetry-bom", version.ref = "opentelemetry-bom" }
+protobuf = { module = "com.google.protobuf:protobuf-java", version.ref = "protobuf" }
+jobrunr = { module = "org.jobrunr:jobrunr-spring-boot-3-starter", version.ref = "jobrunr" }
 
 [plugins]
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
