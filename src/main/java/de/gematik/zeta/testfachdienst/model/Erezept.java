@@ -72,13 +72,11 @@ public class Erezept {
   @Schema(description = "Dosage instructions", example = "1 tablet, 3× daily after meals")
   private String dosage;
 
-  @PastOrPresent
   @Column(nullable = false)
   @Schema(description = "When it was issued (ISO-8601)", example = "2025-09-22T10:30:00Z",
       format = "date-time")
   private OffsetDateTime issuedAt;
 
-  @FutureOrPresent
   @Schema(description = "When it expires (ISO-8601)", example = "2025-12-31T23:59:59Z",
       format = "date-time")
   private OffsetDateTime expiresAt;

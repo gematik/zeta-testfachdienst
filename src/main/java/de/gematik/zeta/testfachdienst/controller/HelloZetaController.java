@@ -27,6 +27,7 @@ package de.gematik.zeta.testfachdienst.controller;
 import de.gematik.zeta.testfachdienst.model.HelloZetaResource;
 import de.gematik.zeta.testfachdienst.service.HelloZetaService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -66,5 +67,19 @@ public class HelloZetaController {
     HelloZetaResource resource = service.getHelloZetaResource();
     log.debug("Got resource: '" + resource + "' from service, returning resource with 200.");
     return ResponseEntity.ok(resource);
+  }
+
+  /**
+   * Return a response that signals a proxy error to the caller.
+   *
+   * @return HTTP 400 response with ZETA-Cause header set to Proxy
+   */
+  @GetMapping("/proxy-error")
+  public ResponseEntity<HelloZetaResource> getHelloZetaProxyErrorResponse() {
+    log.debug("Returning proxy error response for HelloZeta.");
+    HelloZetaResource resource = service.getHelloZetaResource();
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        .header("ZETA-Cause", "Proxy")
+        .body(resource);
   }
 }

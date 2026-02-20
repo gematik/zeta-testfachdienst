@@ -15,7 +15,7 @@ plugins {
 }
 
 group = "de.gematik.zeta"
-version = "0.1.3"
+version = "0.3.0"
 description =
     "achelos Testfachdienst providing a REST API with CRUD operations, secure communication via TLS and Websocket connections."
 
