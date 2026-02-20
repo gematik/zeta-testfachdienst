@@ -62,4 +62,20 @@ class HelloZetaControllerTest {
     assertThat(response.getStatusCode().value()).isEqualTo(200);
     verify(service).getHelloZetaResource();
   }
+
+  /**
+   * Verifies that the proxy error endpoint sets the ZETA-Cause header.
+   */
+  @Test
+  void getHelloZetaProxyErrorResponse_setsProxyHeader() {
+    var resource = new HelloZetaResource("Hello");
+    when(service.getHelloZetaResource()).thenReturn(resource);
+
+    var response = controller.getHelloZetaProxyErrorResponse();
+
+    assertThat(response.getBody()).isSameAs(resource);
+    assertThat(response.getStatusCode().value()).isEqualTo(400);
+    assertThat(response.getHeaders().getFirst("ZETA-Cause")).isEqualTo("Proxy");
+    verify(service).getHelloZetaResource();
+  }
 }
