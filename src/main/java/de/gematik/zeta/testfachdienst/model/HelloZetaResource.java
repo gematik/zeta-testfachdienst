@@ -18,22 +18,30 @@
  *
  * *******
  *
- * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
+ * For additional notes and disclaimer from gematik and in case of changes by gematik
+ * find details in the "Readme" file.
  * #L%
  */
 
 package de.gematik.zeta.testfachdienst.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
 /**
  * DTO that holds a greeting message returned by the ZETA showcase endpoint.
  */
+@Schema(
+    name = "HelloZetaResource",
+    description = "Simple greeting payload returned by Hello ZETA endpoints")
 public class HelloZetaResource {
 
   @Getter
   @Setter
+  @Schema(
+      description = "Greeting text returned to the caller",
+      example = "Hello ZETA!")
   private String message;
 
   /**

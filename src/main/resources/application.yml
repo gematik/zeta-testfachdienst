@@ -70,9 +70,9 @@ management:
 selfdisclosure:
   resource-attributes:
     product_name: "Testfachdienst"
-    product_version: 0.1.3
+    product_version: "@projectVersion@"
     producttype_version: 1.0.0
-    configuration_version: 0.1.3
+    configuration_version: "@projectVersion@"
 
 otlp:
   export:
@@ -86,6 +86,8 @@ otlp:
         host: ${OTLP_EXPORT_HTTP_HOST:http://zeta-guard-telemetry-gateway:4318}
 
 jobrunr:
+  database:
+    type: sql
   background-job-server:
     enabled: true
     poll-interval-in-seconds: 5
@@ -104,7 +106,7 @@ springwolf:
     base-package: de.gematik.zeta.testfachdienst.ws
     info:
       title: "${spring.application.name} AsyncAPI"
-      version: "0.1.0"
+      version: "@projectVersion@"
     servers:
       ws:
         protocol: stomp

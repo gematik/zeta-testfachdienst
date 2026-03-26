@@ -283,9 +283,84 @@
           "hello-zeta-controller"
         ],
         "operationId": "getHelloZetaResponse",
+        "parameters": [
+          {
+            "name": "responseDelay",
+            "in": "query",
+            "description": "Optional response delay in seconds.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/de.gematik.zeta.testfachdienst.model.HelloZetaResource"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/hellozeta/delay/{seconds}": {
+      "get": {
+        "tags": [
+          "hello-zeta-controller"
+        ],
+        "operationId": "getHelloZetaResponseWithPathDelay",
+        "parameters": [
+          {
+            "name": "seconds",
+            "in": "path",
+            "description": "Required non-negative response delay in seconds.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/de.gematik.zeta.testfachdienst.model.HelloZetaResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/hellozeta/proxy-error": {
+      "get": {
+        "tags": [
+          "hello-zeta-controller"
+        ],
+        "operationId": "getHelloZetaProxyErrorResponse",
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "headers": {
+              "ZETA-Cause": {
+                "description": "Reason for the proxy-specific failure.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
             "content": {
               "*/*": {
                 "schema": {

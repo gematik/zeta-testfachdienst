@@ -18,7 +18,8 @@
  *
  * *******
  *
- * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
+ * For additional notes and disclaimer from gematik and in case of changes by gematik
+ * find details in the "Readme" file.
  * #L%
  */
 
@@ -56,7 +57,8 @@ public class LoggingHandshakeInterceptor implements HandshakeInterceptor {
       @NonNull Map<String, Object> attributes) {
 
     log.info(
-        "WS handshake start uri={} remote={} host={} x-forwarded-for={} proto={} origin={} subprotocol={} extensions={} version={}",
+        "WS handshake start uri={} remote={} host={} x-forwarded-for={} proto={} origin={} "
+            + "subprotocol={} extensions={} version={}",
         request.getURI(),
         request.getRemoteAddress(),
         request.getHeaders().getFirst("Host"),

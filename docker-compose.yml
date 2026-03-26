@@ -1,6 +1,5 @@
 services:
   testfachdienst:
-    # You need to execute .\gradlew jibDockerBuild first before you can use this docker image.
-    image: your-docker-registry.example.org/zeta/testing/testfachdienst:latest
+    image: registry.tas-devtools-gitlab.spree.de:443/zeta/testing/testfachdienst:latest
     ports:
       - "8080:8080"

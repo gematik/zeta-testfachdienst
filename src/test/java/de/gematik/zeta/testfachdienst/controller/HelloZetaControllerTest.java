@@ -18,14 +18,17 @@
  *
  * *******
  *
- * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
+ * For additional notes and disclaimer from gematik and in case of changes by gematik
+ * find details in the "Readme" file.
  * #L%
  */
 
 package de.gematik.zeta.testfachdienst.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import de.gematik.zeta.testfachdienst.model.HelloZetaResource;
@@ -35,6 +38,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Unit tests for {@link HelloZetaController}.
@@ -56,7 +60,7 @@ class HelloZetaControllerTest {
     var resource = new HelloZetaResource("Hello");
     when(service.getHelloZetaResource()).thenReturn(resource);
 
-    var response = controller.getHelloZetaResponse();
+    var response = controller.getHelloZetaResponse(null);
 
     assertThat(response.getBody()).isSameAs(resource);
     assertThat(response.getStatusCode().value()).isEqualTo(200);
@@ -77,5 +81,54 @@ class HelloZetaControllerTest {
     assertThat(response.getStatusCode().value()).isEqualTo(400);
     assertThat(response.getHeaders().getFirst("ZETA-Cause")).isEqualTo("Proxy");
     verify(service).getHelloZetaResource();
+  }
+
+  /**
+   * Verifies that the optional responseDelay query parameter delays the response.
+   */
+  @Test
+  void getHelloZetaResponse_withResponseDelay_waitsBeforeReturning() {
+    var resource = new HelloZetaResource("Hello");
+    when(service.getHelloZetaResource()).thenReturn(resource);
+
+    long startTimeNanos = System.nanoTime();
+    var response = controller.getHelloZetaResponse(1);
+    long durationMillis = (System.nanoTime() - startTimeNanos) / 1_000_000;
+
+    assertThat(response.getBody()).isSameAs(resource);
+    assertThat(response.getStatusCode().value()).isEqualTo(200);
+    assertThat(durationMillis).isGreaterThanOrEqualTo(900);
+    verify(service).getHelloZetaResource();
+  }
+
+  /**
+   * Verifies that the path-based delay endpoint waits before returning.
+   */
+  @Test
+  void getHelloZetaResponseWithPathDelay_waitsBeforeReturning() {
+    var resource = new HelloZetaResource("Hello");
+    when(service.getHelloZetaResource()).thenReturn(resource);
+
+    long startTimeNanos = System.nanoTime();
+    var response = controller.getHelloZetaResponseWithPathDelay(1);
+    long durationMillis = (System.nanoTime() - startTimeNanos) / 1_000_000;
+
+    assertThat(response.getBody()).isSameAs(resource);
+    assertThat(response.getStatusCode().value()).isEqualTo(200);
+    assertThat(durationMillis).isGreaterThanOrEqualTo(900);
+    verify(service).getHelloZetaResource();
+  }
+
+  /**
+   * Verifies that negative path-based delays are rejected with HTTP 400.
+   */
+  @Test
+  void getHelloZetaResponseWithPathDelay_withNegativeDelay_throwsBadRequest() {
+    assertThatThrownBy(() -> controller.getHelloZetaResponseWithPathDelay(-1))
+        .isInstanceOf(ResponseStatusException.class)
+        .extracting(ex -> ((ResponseStatusException) ex).getStatusCode().value())
+        .isEqualTo(400);
+
+    verifyNoInteractions(service);
   }
 }

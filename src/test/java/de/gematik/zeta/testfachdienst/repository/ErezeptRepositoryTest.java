@@ -18,7 +18,8 @@
  *
  * *******
  *
- * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
+ * For additional notes and disclaimer from gematik and in case of changes by gematik
+ * find details in the "Readme" file.
  * #L%
  */
 
@@ -32,12 +33,16 @@ import java.time.OffsetDateTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 
 /**
  * Persistence tests for {@link ErezeptRepository}.
  */
-@DataJpaTest
+@SpringBootTest(
+    properties = {
+        "server.ssl.enabled=false",
+        "jobrunr.dashboard.enabled=false"
+    })
 class ErezeptRepositoryTest {
 
   @Autowired
@@ -60,7 +65,11 @@ class ErezeptRepositoryTest {
         .status(ErezeptStatus.SIGNED)
         .build());
 
-    assertThat(repository.findByPrescriptionId("RX-001")).contains(saved);
+    var found = repository.findByPrescriptionId("RX-001");
+
+    assertThat(found).isPresent();
+    assertThat(found.orElseThrow().getId()).isEqualTo(saved.getId());
+    assertThat(found.orElseThrow().getPrescriptionId()).isEqualTo(saved.getPrescriptionId());
   }
 
   /**
@@ -84,4 +93,3 @@ class ErezeptRepositoryTest {
     assertThat(repository.existsByPrescriptionId("RX-unknown")).isFalse();
   }
 }
-

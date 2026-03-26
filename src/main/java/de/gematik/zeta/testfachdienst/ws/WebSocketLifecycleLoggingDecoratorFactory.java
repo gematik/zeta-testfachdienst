@@ -18,7 +18,8 @@
  *
  * *******
  *
- * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
+ * For additional notes and disclaimer from gematik and in case of changes by gematik
+ * find details in the "Readme" file.
  * #L%
  */
 
@@ -54,8 +55,13 @@ public class WebSocketLifecycleLoggingDecoratorFactory implements WebSocketHandl
        * @throws Exception if the delegate handler raises an error
        */
       @Override
-      public void afterConnectionEstablished(@NonNull WebSocketSession session) throws Exception {
-        log.info("WS session established id={} principal={} protocol={}", session.getId(), session.getPrincipal(), session.getAcceptedProtocol());
+      public void afterConnectionEstablished(@NonNull WebSocketSession session)
+          throws Exception {
+        log.info(
+            "WS session established id={} principal={} protocol={}",
+            session.getId(),
+            session.getPrincipal(),
+            session.getAcceptedProtocol());
         super.afterConnectionEstablished(session);
       }
 
@@ -67,8 +73,13 @@ public class WebSocketLifecycleLoggingDecoratorFactory implements WebSocketHandl
        * @throws Exception if the delegate handler raises an error
        */
       @Override
-      public void afterConnectionClosed(@NonNull WebSocketSession session, @NonNull CloseStatus closeStatus) throws Exception {
-        log.info("WS session closed id={} code={} reason={}", session.getId(), closeStatus.getCode(), closeStatus.getReason());
+      public void afterConnectionClosed(
+          @NonNull WebSocketSession session, @NonNull CloseStatus closeStatus) throws Exception {
+        log.info(
+            "WS session closed id={} code={} reason={}",
+            session.getId(),
+            closeStatus.getCode(),
+            closeStatus.getReason());
         super.afterConnectionClosed(session, closeStatus);
       }
     };

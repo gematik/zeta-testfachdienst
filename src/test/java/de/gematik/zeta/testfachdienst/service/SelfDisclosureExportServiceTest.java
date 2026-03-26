@@ -18,13 +18,16 @@
  *
  * *******
  *
- * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
+ * For additional notes and disclaimer from gematik and in case of changes by gematik
+ * find details in the "Readme" file.
  * #L%
  */
 
 package de.gematik.zeta.testfachdienst.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
@@ -138,5 +141,121 @@ class SelfDisclosureExportServiceTest {
     service.exportSelfDisclosure();
 
     verifyNoInteractions(exporterFactory, logRecordExporter, selfDisclosureService);
+  }
+
+  /**
+   * Confirms the already-prefixed HTTP endpoint is used unchanged.
+   */
+  @Test
+  void keepsExistingHttpScheme() {
+    when(config.isGrpcExportEnabled()).thenReturn(false);
+    when(config.isHttpExportEnabled()).thenReturn(true);
+    when(config.getHttpHost()).thenReturn("https://telemetry:4318");
+
+    LogRecordData record =
+        TestLogRecordData.builder()
+            .setTimestamp(Instant.now())
+            .setBody("test")
+            .build();
+    when(selfDisclosureService.generateSelfDisclosureRecord()).thenReturn(record);
+
+    SelfDisclosureExportService service =
+        new SelfDisclosureExportService(selfDisclosureService, config, exporterFactory);
+    when(exporterFactory.createHttpExporter("https://telemetry:4318")).thenReturn(logRecordExporter);
+    when(logRecordExporter.export(anyList())).thenReturn(CompletableResultCode.ofSuccess());
+
+    service.exportSelfDisclosure();
+
+    verify(exporterFactory).createHttpExporter("https://telemetry:4318");
+  }
+
+  /**
+   * Confirms the service prefers the gRPC exporter when both protocols are enabled.
+   */
+  @Test
+  void prefersGrpcWhenBothProtocolsAreEnabled() {
+    when(config.isGrpcExportEnabled()).thenReturn(true);
+    when(config.isHttpExportEnabled()).thenReturn(true);
+    when(config.getGrpcHost()).thenReturn("https://telemetry:4317");
+
+    LogRecordData record =
+        TestLogRecordData.builder()
+            .setTimestamp(Instant.now())
+            .setBody("test")
+            .build();
+    when(selfDisclosureService.generateSelfDisclosureRecord()).thenReturn(record);
+    when(exporterFactory.createGrpcExporter("https://telemetry:4317")).thenReturn(logRecordExporter);
+    when(logRecordExporter.export(anyList())).thenReturn(CompletableResultCode.ofSuccess());
+
+    SelfDisclosureExportService service =
+        new SelfDisclosureExportService(selfDisclosureService, config, exporterFactory);
+    service.exportSelfDisclosure();
+
+    verify(exporterFactory).createGrpcExporter("https://telemetry:4317");
+    verify(exporterFactory, never()).createHttpExporter(anyString());
+  }
+
+  /**
+   * Ensures an empty endpoint is rejected early.
+   */
+  @Test
+  void rejectsBlankExporterEndpoint() {
+    when(config.isGrpcExportEnabled()).thenReturn(false);
+    when(config.isHttpExportEnabled()).thenReturn(true);
+    when(config.getHttpHost()).thenReturn(" ");
+
+    SelfDisclosureExportService service =
+        new SelfDisclosureExportService(selfDisclosureService, config, exporterFactory);
+
+    assertThrows(IllegalArgumentException.class, service::exportSelfDisclosure);
+    verifyNoInteractions(exporterFactory, selfDisclosureService);
+  }
+
+  /**
+   * Ensures the exporter is created only once and reused for subsequent exports.
+   */
+  @Test
+  void reusesInitializedExporter() {
+    when(config.isGrpcExportEnabled()).thenReturn(false);
+    when(config.isHttpExportEnabled()).thenReturn(true);
+    when(config.getHttpHost()).thenReturn("telemetry:4318");
+
+    LogRecordData firstRecord =
+        TestLogRecordData.builder()
+            .setTimestamp(Instant.now())
+            .setBody("first")
+            .build();
+    LogRecordData secondRecord =
+        TestLogRecordData.builder()
+            .setTimestamp(Instant.now())
+            .setBody("second")
+            .build();
+    when(selfDisclosureService.generateSelfDisclosureRecord())
+        .thenReturn(firstRecord, secondRecord);
+    when(exporterFactory.createHttpExporter("http://telemetry:4318"))
+        .thenReturn(logRecordExporter);
+    when(logRecordExporter.export(anyList())).thenReturn(CompletableResultCode.ofSuccess());
+
+    SelfDisclosureExportService service =
+        new SelfDisclosureExportService(selfDisclosureService, config, exporterFactory);
+    service.exportSelfDisclosure();
+    service.exportSelfDisclosure();
+
+    verify(exporterFactory).createHttpExporter("http://telemetry:4318");
+    verify(logRecordExporter).export(Collections.singletonList(firstRecord));
+    verify(logRecordExporter).export(Collections.singletonList(secondRecord));
+  }
+
+  /**
+   * Verifies the configured export interval is returned unchanged.
+   */
+  @Test
+  void exposesConfiguredInterval() {
+    when(config.getIntervalSeconds()).thenReturn(45L);
+
+    SelfDisclosureExportService service =
+        new SelfDisclosureExportService(selfDisclosureService, config, exporterFactory);
+
+    assertThat(service.getExportIntervalInSeconds()).isEqualTo(45L);
   }
 }

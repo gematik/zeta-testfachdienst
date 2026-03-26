@@ -18,7 +18,8 @@
  *
  * *******
  *
- * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
+ * For additional notes and disclaimer from gematik and in case of changes by gematik
+ * find details in the "Readme" file.
  * #L%
  */
 
@@ -27,8 +28,9 @@ package de.gematik.zeta.testfachdienst.ws;
 import de.gematik.zeta.testfachdienst.model.Erezept;
 import de.gematik.zeta.testfachdienst.model.ErezeptStatus;
 import de.gematik.zeta.testfachdienst.service.ErezeptService;
+import de.gematik.zeta.testfachdienst.ws.model.ErezeptDeleteResponse;
+import de.gematik.zeta.testfachdienst.ws.model.ErezeptListResponse;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -138,9 +140,9 @@ public class ErezeptWsController {
    */
   @MessageMapping("erezept.list")
   @SendToUser("/queue/erezept")
-  public List<Erezept> list() {
+  public ErezeptListResponse list() {
     log.info("STOMP erezept.list request received");
-    return service.findAll();
+    return new ErezeptListResponse(service.findAll());
   }
 
   /**
@@ -215,7 +217,7 @@ public class ErezeptWsController {
    */
   @MessageMapping("erezept.delete.{id}")
   @SendToUser("/queue/erezept")
-  public java.util.Map<String, Object> delete(@DestinationVariable Long id) {
+  public ErezeptDeleteResponse delete(@DestinationVariable Long id) {
     log.info("STOMP erezept.delete request received for id={}", id);
     if (!service.existsById(id)) {
       throw new ResponseStatusException(
@@ -223,7 +225,7 @@ public class ErezeptWsController {
     }
     service.deleteById(id);
     log.info("STOMP erezept.delete removed id={}", id);
-    return java.util.Map.of("id", id, "status", "deleted");
+    return new ErezeptDeleteResponse(id, "deleted");
   }
 
   /**

@@ -23,33 +23,26 @@
  * #L%
  */
 
-package de.gematik.zeta.testfachdienst.model;
+package de.gematik.zeta.testfachdienst;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import static org.mockito.Mockito.mockStatic;
 
-/**
- * Enumeration of the lifecycle states an electronic prescription can assume.
- */
-@Schema(description = "Lifecycle states of a prescription")
-public enum ErezeptStatus {
-  /**
-   * Prescription has been created but not yet signed.
-   */
-  CREATED,
-  /**
-   * Prescription has been signed and is ready for dispensing.
-   */
-  SIGNED,
-  /**
-   * Prescription has been dispensed to the patient.
-   */
-  DISPENSED,
-  /**
-   * Prescription has been canceled before completion.
-   */
-  CANCELLED,
-  /**
-   * Prescription is no longer valid because it passed its expiry date.
-   */
-  EXPIRED
+import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.springframework.boot.SpringApplication;
+
+/** Tests for {@link TestfachdienstApplication}. */
+class TestfachdienstApplicationTest {
+
+  @Test
+  void mainDelegatesToSpringApplicationRun() {
+    try (MockedStatic<SpringApplication> springApplication = mockStatic(SpringApplication.class)) {
+      TestfachdienstApplication.main(new String[]{"--server.port=0"});
+
+      springApplication.verify(
+          () -> SpringApplication.run(
+              TestfachdienstApplication.class,
+              new String[]{"--server.port=0"}));
+    }
+  }
 }

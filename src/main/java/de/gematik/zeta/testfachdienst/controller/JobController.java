@@ -18,13 +18,21 @@
  *
  * *******
  *
- * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
+ * For additional notes and disclaimer from gematik and in case of changes by gematik
+ * find details in the "Readme" file.
  * #L%
  */
 
 package de.gematik.zeta.testfachdienst.controller;
 
 import de.gematik.zeta.testfachdienst.service.SelfDisclosureExportService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import org.jobrunr.scheduling.JobScheduler;
@@ -38,10 +46,13 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/jobs")
+@Tag(
+    name = "Jobs",
+    description = "Operational endpoints for background job scheduling and status inspection")
 public class JobController {
 
-  private JobScheduler jobScheduler;
-  private SelfDisclosureExportService selfDisclosureExportService;
+  private final JobScheduler jobScheduler;
+  private final SelfDisclosureExportService selfDisclosureExportService;
 
   /**
    * Constructor for controller that also initiates job scheduling.
@@ -55,21 +66,40 @@ public class JobController {
     scheduleInitial(jobScheduler, service);
   }
 
+  /**
+   * Register the recurring self-disclosure export job during controller initialization.
+   *
+   * @param scheduler JobRunr scheduler used to create the recurring job
+   * @param service export service invoked by the scheduled job
+   */
   private void scheduleInitial(JobScheduler scheduler, SelfDisclosureExportService service) {
     scheduler.createRecurrently(
         RecurringJobBuilder.aRecurringJob()
-          .withId("self-disclosure-export")
-          .withInterval(Duration.of(service.getExportIntervalInSeconds(), ChronoUnit.SECONDS))
-          .withDetails(service::exportSelfDisclosure)
+            .withId("self-disclosure-export")
+            .withInterval(Duration.of(service.getExportIntervalInSeconds(), ChronoUnit.SECONDS))
+            .withDetails(service::exportSelfDisclosure)
     );
   }
 
   /**
    * Dummy endpoint to activate controller.
    *
-   * @return Constant string
+   * @return status string describing the job wiring
    */
   @GetMapping(value = "/info")
+  @Operation(
+      summary = "Return background job status information",
+      description = "Provides a lightweight status payload for the recurring self-disclosure "
+          + "export job scheduling setup.")
+  @ApiResponses({
+      @ApiResponse(
+          responseCode = "200",
+          description = "Job status returned successfully",
+          content = @Content(
+              mediaType = "text/plain",
+              schema = @Schema(type = "string"),
+              examples = @ExampleObject(value = "{\"status\": \"fantastic!\"}")))
+  })
   public String info() {
     return "{\"status\": \"fantastic!\"}";
   }

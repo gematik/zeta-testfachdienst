@@ -1,17 +1,18 @@
 [versions]
-spring-boot = "3.5.5"
+spring-boot = "4.0.3"
 spring-dependency-management = "1.1.7"
-springdoc = "2.8.13"
-springwolf = "1.19.0"
-freefair-lombok = "9.0.0"
+springdoc = "3.0.2"
+springwolf = "2.1.0"
 lombok = "1.18.42"
+spotless = "7.2.1"
+license-report = "3.1.1"
+graalvm-native = "0.11.1"
 checkstyle = "12.1.1"
 jacoco = "0.8.12"
 versions = "0.53.0"
-jib = "3.4.5"
 opentelemetry-bom = "1.56.0"
 protobuf = "4.33.1"
-jobrunr = "8.3.0"
+jobrunr = "8.5.0"
 
 [libraries]
 springdoc = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
@@ -20,11 +21,12 @@ springwolfstompbinding = { module = "io.github.springwolf:springwolf-stomp-bindi
 springwolfui = { module = "io.github.springwolf:springwolf-ui", version.ref = "springwolf" }
 opentelemetrybom = { module = "io.opentelemetry:opentelemetry-bom", version.ref = "opentelemetry-bom" }
 protobuf = { module = "com.google.protobuf:protobuf-java", version.ref = "protobuf" }
-jobrunr = { module = "org.jobrunr:jobrunr-spring-boot-3-starter", version.ref = "jobrunr" }
+jobrunr = { module = "org.jobrunr:jobrunr-spring-boot-4-starter", version.ref = "jobrunr" }
 
 [plugins]
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
 spring-dependency-management = { id = "io.spring.dependency-management", version.ref = "spring-dependency-management" }
-freefair-lombok = { id = "io.freefair.lombok", version.ref = "freefair-lombok" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
+license-report = { id = "com.github.jk1.dependency-license-report", version.ref = "license-report" }
+graalvm-native = { id = "org.graalvm.buildtools.native", version.ref = "graalvm-native" }
 versions = { id = "com.github.ben-manes.versions", version.ref = "versions" }
-jib = { id = "com.google.cloud.tools.jib", version.ref = "jib" }
