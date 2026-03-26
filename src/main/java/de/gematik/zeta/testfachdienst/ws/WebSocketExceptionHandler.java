@@ -18,7 +18,8 @@
  *
  * *******
  *
- * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
+ * For additional notes and disclaimer from gematik and in case of changes by gematik
+ * find details in the "Readme" file.
  * #L%
  */
 
@@ -32,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.support.MethodArgumentNotValidException;
+import org.springframework.messaging.handler.annotation.support.MethodArgumentTypeMismatchException;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -80,6 +82,16 @@ public class WebSocketExceptionHandler {
           .message("Validation failed")
           .timestamp(OffsetDateTime.now())
           .details(Map.of("errors", errors))
+          .build();
+    }
+
+    if (ex instanceof MethodArgumentTypeMismatchException mismatchEx) {
+      log.warn("Destination variable type mismatch: {}", ex.getMessage());
+      return WebSocketErrorResponse.builder()
+          .status(400)
+          .message("Invalid STOMP destination variable")
+          .timestamp(OffsetDateTime.now())
+          .details(Map.of("error", mismatchEx.getMessage()))
           .build();
     }
 

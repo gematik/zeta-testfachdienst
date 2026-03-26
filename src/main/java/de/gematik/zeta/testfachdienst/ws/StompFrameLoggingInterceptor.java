@@ -18,7 +18,8 @@
  *
  * *******
  *
- * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
+ * For additional notes and disclaimer from gematik and in case of changes by gematik
+ * find details in the "Readme" file.
  * #L%
  */
 
@@ -48,7 +49,8 @@ public class StompFrameLoggingInterceptor implements ChannelInterceptor {
    */
   @Override
   public Message<?> preSend(@NonNull Message<?> message, @NonNull MessageChannel channel) {
-    StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+    StompHeaderAccessor accessor =
+        MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
     if (accessor != null && accessor.getCommand() != null) {
       logCommand(accessor);
     }
@@ -66,12 +68,30 @@ public class StompFrameLoggingInterceptor implements ChannelInterceptor {
       return;
     }
     switch (command) {
-      case CONNECT, STOMP -> log.info("STOMP {} session={} host={} accept-version={}",
-          command, accessor.getSessionId(), accessor.getHost(), accessor.getAcceptVersion());
-      case SUBSCRIBE -> log.info("STOMP SUBSCRIBE session={} destination={} id={}",
-          accessor.getSessionId(), accessor.getDestination(), accessor.getSubscriptionId());
-      case SEND -> log.info("STOMP SEND session={} destination={}", accessor.getSessionId(), accessor.getDestination());
-      default -> log.info("STOMP {} session={} destination={}", command, accessor.getSessionId(), accessor.getDestination());
+      case CONNECT, STOMP ->
+          log.info(
+              "STOMP {} session={} host={} accept-version={}",
+              command,
+              accessor.getSessionId(),
+              accessor.getHost(),
+              accessor.getAcceptVersion());
+      case SUBSCRIBE ->
+          log.info(
+              "STOMP SUBSCRIBE session={} destination={} id={}",
+              accessor.getSessionId(),
+              accessor.getDestination(),
+              accessor.getSubscriptionId());
+      case SEND ->
+          log.info(
+              "STOMP SEND session={} destination={}",
+              accessor.getSessionId(),
+              accessor.getDestination());
+      default ->
+          log.info(
+              "STOMP {} session={} destination={}",
+              command,
+              accessor.getSessionId(),
+              accessor.getDestination());
     }
   }
 }

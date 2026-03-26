@@ -22,34 +22,3 @@
  * find details in the "Readme" file.
  * #L%
  */
-
-package de.gematik.zeta.testfachdienst.model;
-
-import io.swagger.v3.oas.annotations.media.Schema;
-
-/**
- * Enumeration of the lifecycle states an electronic prescription can assume.
- */
-@Schema(description = "Lifecycle states of a prescription")
-public enum ErezeptStatus {
-  /**
-   * Prescription has been created but not yet signed.
-   */
-  CREATED,
-  /**
-   * Prescription has been signed and is ready for dispensing.
-   */
-  SIGNED,
-  /**
-   * Prescription has been dispensed to the patient.
-   */
-  DISPENSED,
-  /**
-   * Prescription has been canceled before completion.
-   */
-  CANCELLED,
-  /**
-   * Prescription is no longer valid because it passed its expiry date.
-   */
-  EXPIRED
-}

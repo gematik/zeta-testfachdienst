@@ -18,7 +18,8 @@
  *
  * *******
  *
- * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
+ * For additional notes and disclaimer from gematik and in case of changes by gematik
+ * find details in the "Readme" file.
  * #L%
  */
 
@@ -32,7 +33,6 @@ import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import java.util.Collections;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 /**
@@ -40,7 +40,6 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @Slf4j
-@Component
 public class SelfDisclosureExportService {
   private final SelfDisclosureService selfDisclosureService;
   private final SelfDisclosureExportConfig config;
@@ -57,7 +56,8 @@ public class SelfDisclosureExportService {
    */
   @Autowired
   @SuppressWarnings("unused")
-  public SelfDisclosureExportService(SelfDisclosureService service, SelfDisclosureExportConfig config) {
+  public SelfDisclosureExportService(
+      SelfDisclosureService service, SelfDisclosureExportConfig config) {
     this(service, config, new DefaultOtlpLogExporterFactory());
   }
 
@@ -196,5 +196,4 @@ public class SelfDisclosureExportService {
           .build();
     }
   }
-
 }

@@ -18,7 +18,8 @@
  *
  * *******
  *
- * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
+ * For additional notes and disclaimer from gematik and in case of changes by gematik
+ * find details in the "Readme" file.
  * #L%
  */
 
@@ -32,14 +33,12 @@ import io.opentelemetry.sdk.testing.logs.TestLogRecordData;
 import java.time.Instant;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
  * Service to provide self disclosure information about the application.
  */
 @Service
-@Slf4j
 @RequiredArgsConstructor
 public class SelfDisclosureService {
 

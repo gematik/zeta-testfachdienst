@@ -23,33 +23,17 @@
  * #L%
  */
 
-package de.gematik.zeta.testfachdienst.model;
+package de.gematik.zeta.testfachdienst.ws.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-/**
- * Enumeration of the lifecycle states an electronic prescription can assume.
- */
-@Schema(description = "Lifecycle states of a prescription")
-public enum ErezeptStatus {
-  /**
-   * Prescription has been created but not yet signed.
-   */
-  CREATED,
-  /**
-   * Prescription has been signed and is ready for dispensing.
-   */
-  SIGNED,
-  /**
-   * Prescription has been dispensed to the patient.
-   */
-  DISPENSED,
-  /**
-   * Prescription has been canceled before completion.
-   */
-  CANCELLED,
-  /**
-   * Prescription is no longer valid because it passed its expiry date.
-   */
-  EXPIRED
+/** Response payload for websocket delete confirmations. */
+@Schema(
+    name = "ErezeptDeleteResponse",
+    description = "WebSocket response confirming that an E-Rezept was deleted")
+public record ErezeptDeleteResponse(
+    @Schema(description = "Identifier of the deleted E-Rezept", example = "42")
+    Long id,
+    @Schema(description = "Deletion status", example = "deleted")
+    String status) {
 }

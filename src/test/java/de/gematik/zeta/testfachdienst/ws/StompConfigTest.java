@@ -18,7 +18,8 @@
  *
  * *******
  *
- * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
+ * For additional notes and disclaimer from gematik and in case of changes by gematik
+ * find details in the "Readme" file.
  * #L%
  */
 
@@ -39,8 +40,10 @@ class StompConfigTest {
     var config = new StompConfig();
     ReflectionTestUtils.setField(config, "contextPath", "");
 
-    var brokerPrefixes = (String[]) ReflectionTestUtils.invokeMethod(config, "resolveBrokerPrefixes");
-    var appPrefixes = (String[]) ReflectionTestUtils.invokeMethod(config, "resolveApplicationPrefixes");
+    var brokerPrefixes =
+        (String[]) ReflectionTestUtils.invokeMethod(config, "resolveBrokerPrefixes");
+    var appPrefixes =
+        (String[]) ReflectionTestUtils.invokeMethod(config, "resolveApplicationPrefixes");
     var userPrefix = (String) ReflectionTestUtils.invokeMethod(config, "resolveUserPrefix");
 
     assertThat(brokerPrefixes).containsExactlyInAnyOrder("/topic", "/queue");
@@ -53,12 +56,33 @@ class StompConfigTest {
     var config = new StompConfig();
     ReflectionTestUtils.setField(config, "contextPath", "/achelos_testfachdienst");
 
-    var brokerPrefixes = (String[]) ReflectionTestUtils.invokeMethod(config, "resolveBrokerPrefixes");
-    var appPrefixes = (String[]) ReflectionTestUtils.invokeMethod(config, "resolveApplicationPrefixes");
+    var brokerPrefixes =
+        (String[]) ReflectionTestUtils.invokeMethod(config, "resolveBrokerPrefixes");
+    var appPrefixes =
+        (String[]) ReflectionTestUtils.invokeMethod(config, "resolveApplicationPrefixes");
     var userPrefix = (String) ReflectionTestUtils.invokeMethod(config, "resolveUserPrefix");
 
     assertThat(brokerPrefixes)
-        .containsExactlyInAnyOrder("/achelos_testfachdienst/topic", "/achelos_testfachdienst/queue", "/queue");
+        .containsExactlyInAnyOrder(
+            "/achelos_testfachdienst/topic", "/achelos_testfachdienst/queue", "/queue");
+    assertThat(appPrefixes).containsExactly("/achelos_testfachdienst/app");
+    assertThat(userPrefix).isEqualTo("/achelos_testfachdienst/user");
+  }
+
+  @Test
+  void normalizesContextPathWithoutLeadingSlashAndWithTrailingSlash() {
+    var config = new StompConfig();
+    ReflectionTestUtils.setField(config, "contextPath", "achelos_testfachdienst/");
+
+    var brokerPrefixes =
+        (String[]) ReflectionTestUtils.invokeMethod(config, "resolveBrokerPrefixes");
+    var appPrefixes =
+        (String[]) ReflectionTestUtils.invokeMethod(config, "resolveApplicationPrefixes");
+    var userPrefix = (String) ReflectionTestUtils.invokeMethod(config, "resolveUserPrefix");
+
+    assertThat(brokerPrefixes)
+        .containsExactlyInAnyOrder(
+            "/achelos_testfachdienst/topic", "/achelos_testfachdienst/queue", "/queue");
     assertThat(appPrefixes).containsExactly("/achelos_testfachdienst/app");
     assertThat(userPrefix).isEqualTo("/achelos_testfachdienst/user");
   }

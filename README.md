@@ -6,7 +6,7 @@
 
 - Lightweight test service used in ZETA/PEP integration scenarios.
 - Provides a public hello endpoint and a fully CRUD-capable E-Rezept API backed by H2.
-- Built with Spring Boot 3.3, Java 21, Spring Data JPA, Spring Security (permissive configuration),
+- Built with Spring Boot 4.0, Java 21, Spring Data JPA, Spring Security (permissive configuration),
   Lombok, SpringDoc OpenAPI, and
   Spring Boot Actuator.
 - Ships with opinionated logging (console + rolling file appender) and an unauthenticated API
@@ -22,9 +22,10 @@
 - [TestfachdienstApplication.java](src/main/java/de/gematik/zeta/testfachdienst/TestfachdienstApplication.java)
   boots the
   Spring context.
-- [HalloZetaController.java](src/main/java/de/gematik/zeta/testfachdienst/controller/HelloZetaController.java)
+- [HelloZetaController.java](src/main/java/de/gematik/zeta/testfachdienst/controller/HelloZetaController.java)
   exposes
-  `GET /hellozeta` via `HelloZetaService`.
+  `GET /hellozeta`, `GET /hellozeta/delay/{seconds}`, and `GET /hellozeta/proxy-error`
+  via `HelloZetaService`.
 - [ERezeptController.java](src/main/java/de/gematik/zeta/testfachdienst/controller/ErezeptController.java)
   offers CRUD
   endpoints under `/api/erezept`.
@@ -75,6 +76,10 @@
 - No local Gradle install required; use the wrapper (`./gradlew` or `gradlew.bat`).
 
 ## Build and Test
+
+The release version is defined once in [gradle.properties](gradle.properties). Runtime metadata in
+`application.yml` is derived from that value during `processResources`, and the checked-in AsyncAPI
+snapshot can be refreshed with `./gradlew syncVersionMetadata`.
 
 ```bash
 ./gradlew clean check        # format & static analysis (Checkstyle)
@@ -152,7 +157,9 @@ default, `8081` when the Kubernetes profile is active).
 
 | Method | Path (default context)                      | Description                                                  |
 |--------|---------------------------------------------|--------------------------------------------------------------|
-| GET    | `/hellozeta`                                | Returns the static hello payload.                            |
+| GET    | `/hellozeta`                                | Returns the static hello payload; accepts optional `responseDelay` seconds as a query parameter. |
+| GET    | `/hellozeta/delay/{seconds}`                | Returns the static hello payload after the path-supplied non-negative delay; negative values return `HTTP 400`. |
+| GET    | `/hellozeta/proxy-error`                    | Returns the hello payload with `HTTP 400` and `ZETA-Cause: Proxy`. |
 | GET    | `/api/erezept`                              | Lists all stored prescriptions.                              |
 | POST   | `/api/erezept`                              | Creates a prescription (rejects duplicate `prescriptionId`). |
 | GET    | `/api/erezept/{id}`                         | Fetches a prescription by database id.                       |
@@ -173,6 +180,12 @@ Example curl against the hello endpoint (HTTP mode):
 
 ```bash
 curl https://localhost:8080/achelos_testfachdienst/hellozeta
+```
+
+Example curl against the delayed hello endpoint (HTTP mode):
+
+```bash
+curl https://localhost:8080/achelos_testfachdienst/hellozeta/delay/2
 ```
 
 Example curl against the health endpoint (HTTP mode):

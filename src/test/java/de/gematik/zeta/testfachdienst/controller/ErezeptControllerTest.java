@@ -18,7 +18,8 @@
  *
  * *******
  *
- * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
+ * For additional notes and disclaimer from gematik and in case of changes by gematik
+ * find details in the "Readme" file.
  * #L%
  */
 
@@ -167,7 +168,8 @@ class ErezeptControllerTest {
 
     var response = controller.create(toPersist);
 
-    assertThat(response.getHeaders().getLocation()).isEqualTo(URI.create("/achelos_testfachdienst/api/erezept/1"));
+    assertThat(response.getHeaders().getLocation())
+        .isEqualTo(URI.create("/achelos_testfachdienst/api/erezept/1"));
     assertThat(response.getBody()).isEqualTo(created);
     verify(service).create(toPersist);
   }

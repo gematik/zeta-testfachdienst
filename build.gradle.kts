@@ -1,23 +1,72 @@
-import com.google.cloud.tools.jib.gradle.BuildDockerTask
-import com.google.cloud.tools.jib.gradle.BuildImageTask
-import com.google.cloud.tools.jib.gradle.BuildTarTask
-import com.google.cloud.tools.jib.gradle.JibExtension
+import org.apache.tools.ant.filters.ReplaceTokens
+import org.gradle.api.DefaultTask
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.TaskAction
 
 plugins {
     java
     jacoco
     checkstyle
+    alias(libs.plugins.spotless)
+    alias(libs.plugins.license.report)
+    alias(libs.plugins.graalvm.native)
     alias(libs.plugins.spring.boot)
     alias(libs.plugins.spring.dependency.management)
-    alias(libs.plugins.freefair.lombok)
     alias(libs.plugins.versions)
-    alias(libs.plugins.jib)
 }
 
 group = "de.gematik.zeta"
-version = "0.3.0"
 description =
     "achelos Testfachdienst providing a REST API with CRUD operations, secure communication via TLS and Websocket connections."
+
+val releaseVersion = project.version.toString()
+
+abstract class SyncVersionMetadataTask : DefaultTask() {
+    @get:Input
+    abstract val releaseVersion: Property<String>
+
+    @get:OutputFile
+    abstract val asyncApiDoc: RegularFileProperty
+
+    @TaskAction
+    fun sync() {
+        val doc = asyncApiDoc.get().asFile
+        val expectedLine = "  version: ${releaseVersion.get()}"
+        val versionPattern = Regex("""(?m)^  version: .*$""")
+        val currentContent = doc.readText()
+        val updatedContent = currentContent.replace(versionPattern, expectedLine)
+
+        check(updatedContent != currentContent || currentContent.contains(expectedLine)) {
+            "${doc.name} does not contain an AsyncAPI version field."
+        }
+
+        if (updatedContent != currentContent) {
+            doc.writeText(updatedContent)
+        }
+    }
+}
+
+abstract class VerifyVersionMetadataTask : DefaultTask() {
+    @get:Input
+    abstract val releaseVersion: Property<String>
+
+    @get:InputFile
+    abstract val asyncApiDoc: RegularFileProperty
+
+    @TaskAction
+    fun verify() {
+        val doc = asyncApiDoc.get().asFile
+        val expectedLine = "  version: ${releaseVersion.get()}"
+
+        check(doc.readText().contains(expectedLine)) {
+            "${doc.name} is out of date. Run ./gradlew syncVersionMetadata."
+        }
+    }
+}
 
 tasks.register("printVersion") {
     val v = project.version.toString()
@@ -36,15 +85,39 @@ repositories {
     mavenCentral()
 }
 
+tasks.processResources {
+    val versionTokens = mapOf("projectVersion" to releaseVersion)
+    filteringCharset = "UTF-8"
+    filesMatching("application.yml") {
+        filter<ReplaceTokens>("tokens" to versionTokens)
+    }
+}
+
+tasks.register<SyncVersionMetadataTask>("syncVersionMetadata") {
+    group = "release"
+    description = "Sync checked-in metadata snapshots with the Gradle project version."
+    releaseVersion.set(project.version.toString())
+    asyncApiDoc.set(layout.projectDirectory.file("docs/async-api-docs.yml"))
+    mustRunAfter("verifyVersionMetadata")
+}
+
+tasks.register<VerifyVersionMetadataTask>("verifyVersionMetadata") {
+    group = "verification"
+    description = "Verify checked-in metadata snapshots match the Gradle project version."
+    releaseVersion.set(project.version.toString())
+    asyncApiDoc.set(layout.projectDirectory.file("docs/async-api-docs.yml"))
+}
+
 dependencies {
+    val lombokVersion = libs.versions.lombok.get()
+
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("org.springframework.boot:spring-boot-starter-websocket")
-    implementation("org.springframework:spring-websocket")
-    implementation("org.springframework.boot:spring-boot-starter-json")
     implementation(libs.springdoc)
     implementation(libs.springwolfstomp)
     implementation(libs.springwolfstompbinding)
@@ -56,6 +129,12 @@ dependencies {
     implementation(libs.protobuf)
     implementation(libs.jobrunr)
 
+    compileOnly("org.projectlombok:lombok:$lombokVersion")
+    annotationProcessor("org.projectlombok:lombok:$lombokVersion")
+    testCompileOnly("org.projectlombok:lombok:$lombokVersion")
+    testAnnotationProcessor("org.projectlombok:lombok:$lombokVersion")
+
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     runtimeOnly(libs.springwolfui)
     runtimeOnly("com.h2database:h2")
@@ -65,7 +144,14 @@ dependencies {
 
 checkstyle {
     toolVersion = libs.versions.checkstyle.get()
-    config = resources.text.fromFile(file("config/checkstyle/custom_google_checks.xml"))
+    val checkstyleToolJar = configurations.checkstyle.get()
+        .resolvedConfiguration
+        .resolvedArtifacts
+        .first {
+            it.moduleVersion.id.group == "com.puppycrawl.tools" && it.name == "checkstyle"
+        }
+        .file
+    config = resources.text.fromArchiveEntry(checkstyleToolJar, "google_checks.xml")
     isIgnoreFailures = false
     maxWarnings = 0
 }
@@ -74,11 +160,35 @@ jacoco {
     toolVersion = libs.versions.jacoco.get()
 }
 
-lombok {
-    version.set(
-        libs.versions.lombok
-            .get(),
-    )
+spotless {
+    val licenseHeader = file("config/license-header.java").readText() + System.lineSeparator()
+
+    java {
+        target("src/main/java/**/*.java", "src/test/java/**/*.java")
+        licenseHeader(licenseHeader, "package ")
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+}
+
+licenseReport {
+    outputDir = layout.buildDirectory.dir("reports/dependency-license").get().asFile.absolutePath
+    renderers =
+        arrayOf<com.github.jk1.license.render.ReportRenderer>(
+            com.github.jk1.license.render.InventoryHtmlReportRenderer(),
+            com.github.jk1.license.render.JsonReportRenderer(),
+        )
+}
+
+graalvmNative {
+    metadataRepository {
+        enabled.set(true)
+    }
+    binaries {
+        named("main") {
+            imageName.set(project.name)
+        }
+    }
 }
 
 tasks.withType<Test>().configureEach {
@@ -97,40 +207,24 @@ tasks.jacocoTestReport {
     }
 }
 
-extensions.configure<JibExtension>("jib") {
-    from {
-        image = "gcr.io/distroless/java21-debian12"
-    }
-    to {
-        image = "your-docker-registry.example.org/zeta/testing/testfachdienst"
-        tags = setOf(project.version.toString(), "latest")
-    }
-    container {
-        containerizingMode = "exploded"
-        jvmFlags =
-            listOf(
-                "-XX:+UseContainerSupport",
-                "-XX:MaxRAMPercentage=75.0",
-                "-XX:+ExitOnOutOfMemoryError",
-            )
-        ports = listOf("8080", "8081")
-        user = "65532:65532"
-        creationTime = "USE_CURRENT_TIMESTAMP"
-        workingDirectory = "/app"
-        labels =
-            mapOf(
-                "org.opencontainers.image.title" to project.name,
-                "org.opencontainers.image.version" to project.version.toString(),
-            )
+tasks.withType<JavaCompile>().configureEach {
+    options.compilerArgs.add("-parameters")
+}
+
+tasks.withType<Checkstyle>().configureEach {
+    if (name == "checkstyleAot" || name == "checkstyleAotTest") {
+        enabled = false
     }
 }
 
-tasks.withType<BuildDockerTask>().configureEach {
-    notCompatibleWithConfigurationCache("Jib touches Project at execution time")
+tasks.named("check") {
+    dependsOn("spotlessCheck", "verifyVersionMetadata")
 }
-tasks.withType<BuildImageTask>().configureEach {
-    notCompatibleWithConfigurationCache("Jib touches Project at execution time")
+
+tasks.named<com.github.jk1.license.task.ReportTask>("generateLicenseReport") {
+    notCompatibleWithConfigurationCache("dependency-license-report touches Project during execution")
 }
-tasks.withType<BuildTarTask>().configureEach {
-    notCompatibleWithConfigurationCache("Jib touches Project at execution time")
+
+tasks.named<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
+    archiveFileName.set("app.jar")
 }

@@ -1,5 +1,6 @@
 stages:
   - lint
+  - license
   - test
   - build
   - publish
@@ -19,29 +20,35 @@ default:
 variables:
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"
   GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle"
-  PACKAGE_NAME: "fat-jar"
-  ## settings for harbor container registry
-  CONTAINER_REGISTRY_SERVER: $CI_REGISTRY
-  CONTAINER_REGISTRY_PROJECT: zeta-testsuite
   CONTAINER_REGISTRY_URL: $CI_REGISTRY_IMAGE
-  CONTAINER_REGISTRY_USER: $CI_REGISTRY_USER
-  CONTAINER_REGISTRY_PASSWORD: $CI_REGISTRY_PASSWORD
   TAG: "${CI_COMMIT_TAG:-$CI_COMMIT_SHORT_SHA}"
 
 lint:
   stage: lint
   dependencies: []
   script:
-    # Gradle Checkstyle tasks fail the job when violations exist (see build.gradle.kts Checkstyle setup).
-    - ./gradlew --no-daemon --stacktrace checkstyleMain checkstyleTest
+    - ./gradlew --no-daemon --stacktrace spotlessCheck checkstyleMain checkstyleTest
   artifacts:
+    when: always
     paths:
       - build/reports/checkstyle/
+      - build/reports/spotless/
+    expire_in: 1 week
+
+third-party-licenses:
+  stage: license
+  dependencies: []
+  script:
+    - ./gradlew --no-daemon --no-configuration-cache --stacktrace generateLicenseReport
+  artifacts:
+    when: always
+    paths:
+      - build/reports/dependency-license/
     expire_in: 1 week
 
 test:
   stage: test
-  needs: [ "lint" ]
+  needs: [ "lint", "third-party-licenses" ]
   dependencies: []
   script:
     - ./gradlew --no-daemon --stacktrace test
@@ -70,49 +77,39 @@ build-jar:
       when: on_success
     - when: never
 
-publish-jar:
+publish-image:
   stage: publish
-  image: curlimages/curl:latest
+  image: docker:27
+  services:
+    - name: docker:27-dind
+      command: [ "--tls=false" ]
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+    TARGET_PLATFORMS: linux/amd64,linux/arm64
   needs: [ "build-jar" ]
   dependencies:
     - build-jar
   script:
     - TAG="${CI_COMMIT_TAG:-${CI_COMMIT_SHORT_SHA:-${CI_COMMIT_REF_SLUG}}}"
-    - JAR_FILE=$(ls build/libs/*.jar | head -n1)
-    - JAR_NAME=$(basename "${JAR_FILE}")
-    - VERSION="${TAG}"
-    - sha256sum "$JAR_FILE" | awk '{print $1}' > "${JAR_FILE}.sha256"
-    - SHA256="$(cat "${JAR_FILE}.sha256")"
-
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
     - |
-      curl --fail --show-error --silent --retry 3 --retry-delay 2
-      --header "JOB-TOKEN: ${CI_JOB_TOKEN}"
-      --header "Content-Type: application/java-archive"
-      --upload-file "$JAR_FILE"
-      "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PACKAGE_NAME}/${TAG}/${JAR_NAME}"
-
+      docker run --privileged --rm tonistiigi/binfmt --install all
+      docker buildx create --name zeta-multiarch --driver docker-container --use || docker buildx use zeta-multiarch
+      docker buildx inspect --bootstrap
     - |
-      curl --fail --show-error --silent --retry 3 --retry-delay 2
-      --header "JOB-TOKEN: ${CI_JOB_TOKEN}"
-      --header "Content-Type: text/plain"
-      --upload-file "${JAR_FILE}.sha256"
-      "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PACKAGE_NAME}/${VERSION}/${JAR_NAME}.sha256"
-
-  rules:
-    - if: '$CI_COMMIT_TAG'
-      when: on_success
-    - when: never
-
-publish-image:
-  stage: publish
-  needs: [ "build-jar" ]
-  dependencies: []
-  script:
-    - TAG="${CI_COMMIT_TAG:-${CI_COMMIT_SHORT_SHA:-${CI_COMMIT_REF_SLUG}}}"
-    - ./gradlew --no-configuration-cache jib
-      -Djib.to.image="${CI_REGISTRY_IMAGE}:${TAG}"
-      -Djib.to.auth.username="${CI_REGISTRY_USER}"
-      -Djib.to.auth.password="${CI_REGISTRY_PASSWORD}"
+      EXTRA_TAG_ARGS=""
+      if [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ]; then
+        EXTRA_TAG_ARGS="-t ${CI_REGISTRY_IMAGE}:latest"
+      fi
+      docker buildx build \
+        --platform "$TARGET_PLATFORMS" \
+        -t "${CI_REGISTRY_IMAGE}:${TAG}" \
+        $EXTRA_TAG_ARGS \
+        --cache-from "type=registry,ref=${CI_REGISTRY_IMAGE}:buildcache" \
+        --cache-to "type=registry,ref=${CI_REGISTRY_IMAGE}:buildcache,mode=max" \
+        --push \
+        .
   rules:
     - if: '$CI_COMMIT_TAG'
       when: on_success
