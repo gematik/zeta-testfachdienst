@@ -104,7 +104,7 @@ and add `-k`/
 
 ```bash
 ./gradlew bootJar
-java -jar build/libs/testfachdienst-0.0.1.jar
+java -jar build/libs/app.jar
 ```
 
 The JAR defaults to plain HTTP: `http://localhost:8080/achelos_testfachdienst/...`.
@@ -304,7 +304,7 @@ with nested overlay filesystems.
 1. Clone the repository and install JDK 21.
 2. Run `./gradlew clean check test` to verify the setup.
 3. Launch the app via `./gradlew bootRun` (HTTPS) or
-   `java -jar build/libs/testfachdienst-0.0.1.jar` (HTTP).
+   `java -jar build/libs/app.jar` (HTTP).
 4. Hit `https://localhost:8080/achelos_testfachdienst/swagger-ui/index.html` (add `-k` to bypass the
    self-signed cert)
    or the HTTP variant based on the chosen launch mode.
