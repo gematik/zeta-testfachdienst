@@ -2,6 +2,24 @@
 
 # Release Notes ZETA Testfachdienst
 
+## Version 0.5.0
+
+TestFachdienst 0.5.0
+
+#### Release Focus:
+
+- Added a STOMP/WebSocket Hello ZETA endpoint at `/app/hellozeta`.
+- Clients sending to `/app/hellozeta` now receive the Hello ZETA payload on their private `/user/queue/hellozeta` destination.
+- The WebSocket Hello ZETA flow reuses the existing `HelloZetaService`, so the STOMP response payload matches the established HTTP Hello ZETA response.
+
+### Known issues:
+
+- None documented for this release.
+
+#### Limitations
+
+- None documented for this release.
+
 ## Version 0.4.0
 
 #### Release Focus:

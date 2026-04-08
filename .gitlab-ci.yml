@@ -8,10 +8,13 @@ stages:
 default:
   image: gradle:jdk21-alpine
   cache:
-    key: "$CI_PROJECT_PATH-slug"
+    key: "${CI_PROJECT_PATH_SLUG}-${CI_COMMIT_REF_SLUG}-gradle-9.1.0"
     paths:
-      - .gradle/
-  # Keep the Gradle wrapper and caches inside the project directory for reuse across jobs.
+      # Cache only stable downloaded artifacts. Gradle's generated Kotlin DSL and
+      # configuration cache state is not safe to restore across CI jobs.
+      - .gradle/wrapper/
+      - .gradle/caches/modules-2/
+  # Keep Gradle state inside the project directory so selected caches can be reused across jobs.
   before_script:
     - export GRADLE_USER_HOME="$CI_PROJECT_DIR/.gradle"
     # The Docker image ships without execute permissions on scripts; fix this before running the wrapper.
