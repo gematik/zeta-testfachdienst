@@ -98,7 +98,18 @@ jobrunr:
 logging:
   level:
     root: INFO
-    de.gematik: DEBUG
+    de.gematik.zeta.testfachdienst: ${APP_LOG_LEVEL:INFO}
+
+app:
+  websocket:
+    transport:
+      message-size-limit-bytes: ${APP_WEBSOCKET_MESSAGE_SIZE_LIMIT_BYTES:65536}
+      send-time-limit-ms: ${APP_WEBSOCKET_SEND_TIME_LIMIT_MS:15000}
+      send-buffer-size-limit-bytes: ${APP_WEBSOCKET_SEND_BUFFER_SIZE_LIMIT_BYTES:524288}
+      time-to-first-message-ms: ${APP_WEBSOCKET_TIME_TO_FIRST_MESSAGE_MS:60000}
+    heartbeat:
+      server-ms: ${APP_WEBSOCKET_SERVER_HEARTBEAT_MS:10000}
+      client-ms: ${APP_WEBSOCKET_CLIENT_HEARTBEAT_MS:10000}
 
 springwolf:
   enabled: true

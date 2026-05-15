@@ -27,15 +27,17 @@ package de.gematik.zeta.testfachdienst.ws;
 
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
 /**
- * Logs incoming WebSocket handshake attempts with key headers to ease debugging of ingress issues.
+ * Logs incoming WebSocket handshake attempts with key headers to ease debugging of
+ * ingress issues. Normal handshake traces stay at DEBUG; failed upgrades stay
+ * visible at WARN.
  */
 @Slf4j
 public class LoggingHandshakeInterceptor implements HandshakeInterceptor {
@@ -56,7 +58,7 @@ public class LoggingHandshakeInterceptor implements HandshakeInterceptor {
       @NonNull WebSocketHandler wsHandler,
       @NonNull Map<String, Object> attributes) {
 
-    log.info(
+    log.debug(
         "WS handshake start uri={} remote={} host={} x-forwarded-for={} proto={} origin={} "
             + "subprotocol={} extensions={} version={}",
         request.getURI(),
@@ -95,6 +97,6 @@ public class LoggingHandshakeInterceptor implements HandshakeInterceptor {
           exception.getMessage(), exception);
       return;
     }
-    log.info("WS handshake success uri={} status={}", request.getURI(), status);
+    log.debug("WS handshake success uri={} status={}", request.getURI(), status);
   }
 }

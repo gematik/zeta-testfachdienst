@@ -26,7 +26,7 @@
 package de.gematik.zeta.testfachdienst.ws;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
@@ -38,6 +38,8 @@ import org.springframework.web.socket.handler.WebSocketHandlerDecoratorFactory;
  */
 @Slf4j
 public class WebSocketLifecycleLoggingDecoratorFactory implements WebSocketHandlerDecoratorFactory {
+
+  private static final int SERVER_TIMEOUT_CLOSE_CODE = 4500;
 
   /**
    * Wrap the given handler with a decorator that logs connection open/close events.
@@ -57,7 +59,7 @@ public class WebSocketLifecycleLoggingDecoratorFactory implements WebSocketHandl
       @Override
       public void afterConnectionEstablished(@NonNull WebSocketSession session)
           throws Exception {
-        log.info(
+        log.debug(
             "WS session established id={} principal={} protocol={}",
             session.getId(),
             session.getPrincipal(),
@@ -75,12 +77,33 @@ public class WebSocketLifecycleLoggingDecoratorFactory implements WebSocketHandl
       @Override
       public void afterConnectionClosed(
           @NonNull WebSocketSession session, @NonNull CloseStatus closeStatus) throws Exception {
-        log.info(
-            "WS session closed id={} code={} reason={}",
-            session.getId(),
-            closeStatus.getCode(),
-            closeStatus.getReason());
+        if (closeStatus.getCode() == SERVER_TIMEOUT_CLOSE_CODE) {
+          log.warn(
+              "WS session timed out before STOMP activity id={} code={} reason={}",
+              session.getId(),
+              closeStatus.getCode(),
+              closeStatus.getReason());
+        } else if (closeStatus.getCode() == CloseStatus.NORMAL.getCode()) {
+          log.debug(
+              "WS session closed id={} code={} reason={}",
+              session.getId(),
+              closeStatus.getCode(),
+              closeStatus.getReason());
+        } else {
+          log.info(
+              "WS session closed id={} code={} reason={}",
+              session.getId(),
+              closeStatus.getCode(),
+              closeStatus.getReason());
+        }
         super.afterConnectionClosed(session, closeStatus);
+      }
+
+      @Override
+      public void handleTransportError(
+          @NonNull WebSocketSession session, @NonNull Throwable exception) throws Exception {
+        log.warn("WS transport error id={} message={}", session.getId(), exception.getMessage());
+        super.handleTransportError(session, exception);
       }
     };
   }
