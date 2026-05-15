@@ -26,16 +26,17 @@
 package de.gematik.zeta.testfachdienst.ws;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 
 /**
- * Minimal STOMP frame logger to see CONNECT/SUBSCRIBE/SEND flow when diagnosing failed handshakes.
+ * Minimal STOMP frame logger to see CONNECT/SUBSCRIBE/SEND flow when diagnosing
+ * failed handshakes. These messages stay at DEBUG so normal stage traffic does
+ * not flood the logs.
  */
 @Slf4j
 public class StompFrameLoggingInterceptor implements ChannelInterceptor {
@@ -49,7 +50,7 @@ public class StompFrameLoggingInterceptor implements ChannelInterceptor {
    */
   @Override
   public Message<?> preSend(@NonNull Message<?> message, @NonNull MessageChannel channel) {
-    StompHeaderAccessor accessor =
+    var accessor =
         MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
     if (accessor != null && accessor.getCommand() != null) {
       logCommand(accessor);
@@ -63,35 +64,31 @@ public class StompFrameLoggingInterceptor implements ChannelInterceptor {
    * @param accessor header accessor containing command and routing details
    */
   private void logCommand(@NonNull StompHeaderAccessor accessor) {
-    StompCommand command = accessor.getCommand();
+    var command = accessor.getCommand();
     if (command == null) {
       return;
     }
     switch (command) {
-      case CONNECT, STOMP ->
-          log.info(
-              "STOMP {} session={} host={} accept-version={}",
-              command,
-              accessor.getSessionId(),
-              accessor.getHost(),
-              accessor.getAcceptVersion());
-      case SUBSCRIBE ->
-          log.info(
-              "STOMP SUBSCRIBE session={} destination={} id={}",
-              accessor.getSessionId(),
-              accessor.getDestination(),
-              accessor.getSubscriptionId());
-      case SEND ->
-          log.info(
-              "STOMP SEND session={} destination={}",
-              accessor.getSessionId(),
-              accessor.getDestination());
-      default ->
-          log.info(
-              "STOMP {} session={} destination={}",
-              command,
-              accessor.getSessionId(),
-              accessor.getDestination());
+      case CONNECT, STOMP -> log.debug(
+          "STOMP {} session={} host={} accept-version={}",
+          command,
+          accessor.getSessionId(),
+          accessor.getHost(),
+          accessor.getAcceptVersion());
+      case SUBSCRIBE -> log.debug(
+          "STOMP SUBSCRIBE session={} destination={} id={}",
+          accessor.getSessionId(),
+          accessor.getDestination(),
+          accessor.getSubscriptionId());
+      case SEND -> log.debug(
+          "STOMP SEND session={} destination={}",
+          accessor.getSessionId(),
+          accessor.getDestination());
+      default -> log.debug(
+          "STOMP {} session={} destination={}",
+          command,
+          accessor.getSessionId(),
+          accessor.getDestination());
     }
   }
 }

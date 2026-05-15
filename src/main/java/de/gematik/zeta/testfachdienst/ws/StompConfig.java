@@ -27,9 +27,11 @@ package de.gematik.zeta.testfachdienst.ws;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
@@ -83,6 +85,24 @@ public class StompConfig implements WebSocketMessageBrokerConfigurer {
   @Value("${server.servlet.context-path:}")
   private String contextPath;
 
+  @Value("${app.websocket.transport.message-size-limit-bytes:65536}")
+  private int messageSizeLimitBytes;
+
+  @Value("${app.websocket.transport.send-time-limit-ms:15000}")
+  private int sendTimeLimitMs;
+
+  @Value("${app.websocket.transport.send-buffer-size-limit-bytes:524288}")
+  private int sendBufferSizeLimitBytes;
+
+  @Value("${app.websocket.transport.time-to-first-message-ms:60000}")
+  private int timeToFirstMessageMs;
+
+  @Value("${app.websocket.heartbeat.server-ms:10000}")
+  private long serverHeartbeatMs;
+
+  @Value("${app.websocket.heartbeat.client-ms:10000}")
+  private long clientHeartbeatMs;
+
   /**
    * Register the STOMP endpoint used for client connections.
    *
@@ -115,7 +135,12 @@ public class StompConfig implements WebSocketMessageBrokerConfigurer {
    */
   @Override
   public void configureWebSocketTransport(WebSocketTransportRegistration registration) {
-    registration.addDecoratorFactory(new WebSocketLifecycleLoggingDecoratorFactory());
+    registration
+        .setMessageSizeLimit(messageSizeLimitBytes)
+        .setSendTimeLimit(sendTimeLimitMs)
+        .setSendBufferSizeLimit(sendBufferSizeLimitBytes)
+        .setTimeToFirstMessage(timeToFirstMessageMs)
+        .addDecoratorFactory(new WebSocketLifecycleLoggingDecoratorFactory());
   }
 
   /**
@@ -125,9 +150,27 @@ public class StompConfig implements WebSocketMessageBrokerConfigurer {
    */
   @Override
   public void configureMessageBroker(MessageBrokerRegistry registry) {
-    registry.enableSimpleBroker(resolveBrokerPrefixes());
+    registry.enableSimpleBroker(resolveBrokerPrefixes())
+        .setHeartbeatValue(resolveHeartbeatValues())
+        .setTaskScheduler(webSocketBrokerTaskScheduler());
     registry.setApplicationDestinationPrefixes(resolveApplicationPrefixes());
     registry.setUserDestinationPrefix(resolveUserPrefix());
+  }
+
+  /**
+   * Create the task scheduler used by the simple broker for heartbeats.
+   *
+   * @return initialized scheduler with graceful shutdown settings
+   */
+  @Bean
+  public ThreadPoolTaskScheduler webSocketBrokerTaskScheduler() {
+    var scheduler = new ThreadPoolTaskScheduler();
+    scheduler.setPoolSize(1);
+    scheduler.setThreadNamePrefix("ws-broker-heartbeat-");
+    scheduler.setWaitForTasksToCompleteOnShutdown(true);
+    scheduler.setAwaitTerminationSeconds(30);
+    scheduler.initialize();
+    return scheduler;
   }
 
   /**
@@ -160,6 +203,15 @@ public class StompConfig implements WebSocketMessageBrokerConfigurer {
    */
   private String resolveUserPrefix() {
     return isContextPathBlank() ? "/user" : withContextPath("/user");
+  }
+
+  /**
+   * Determine the broker heartbeat intervals for server-to-client and client-to-server traffic.
+   *
+   * @return heartbeat values in milliseconds
+   */
+  private long[] resolveHeartbeatValues() {
+    return new long[] {serverHeartbeatMs, clientHeartbeatMs};
   }
 
   /**

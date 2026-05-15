@@ -60,7 +60,11 @@ public class WebSocketExceptionHandler {
   @SendToUser("/queue/erezept")
   public WebSocketErrorResponse handleException(Exception ex) {
     if (ex instanceof ResponseStatusException rsEx) {
-      log.warn("WebSocket error [{}]: {}", rsEx.getStatusCode(), rsEx.getReason());
+      if (rsEx.getStatusCode().is4xxClientError()) {
+        log.info("WebSocket client error [{}]: {}", rsEx.getStatusCode(), rsEx.getReason());
+      } else {
+        log.warn("WebSocket server error [{}]: {}", rsEx.getStatusCode(), rsEx.getReason());
+      }
       return WebSocketErrorResponse.builder()
           .status(rsEx.getStatusCode().value())
           .message(rsEx.getReason())
@@ -69,8 +73,16 @@ public class WebSocketExceptionHandler {
     }
 
     if (ex instanceof MethodArgumentNotValidException validationEx) {
-      log.warn("Validation error: {}", ex.getMessage());
-      Map<String, String> errors = validationEx.getBindingResult()
+      log.info("WebSocket validation error: {}", ex.getMessage());
+      if (validationEx.getBindingResult() == null) {
+        log.warn("WebSocket validation error with null binding result: {}", ex.getMessage());
+        return WebSocketErrorResponse.builder()
+            .status(400)
+            .message("Validation failed")
+            .timestamp(OffsetDateTime.now())
+            .build();
+      }
+      var errors = validationEx.getBindingResult()
           .getFieldErrors()
           .stream()
           .collect(Collectors.toMap(
@@ -86,7 +98,7 @@ public class WebSocketExceptionHandler {
     }
 
     if (ex instanceof MethodArgumentTypeMismatchException mismatchEx) {
-      log.warn("Destination variable type mismatch: {}", ex.getMessage());
+      log.info("WebSocket destination variable type mismatch: {}", ex.getMessage());
       return WebSocketErrorResponse.builder()
           .status(400)
           .message("Invalid STOMP destination variable")
@@ -96,7 +108,7 @@ public class WebSocketExceptionHandler {
     }
 
     if (ex instanceof MessageConversionException conversionEx) {
-      log.warn("Message conversion error: {}", ex.getMessage());
+      log.info("WebSocket message conversion error: {}", ex.getMessage());
       return WebSocketErrorResponse.builder()
           .status(400)
           .message("Invalid message format or missing required fields")

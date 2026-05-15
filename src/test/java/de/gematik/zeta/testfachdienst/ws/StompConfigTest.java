@@ -27,7 +27,9 @@ package de.gematik.zeta.testfachdienst.ws;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.lang.reflect.Field;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.util.ReflectionTestUtils;
 
 /**
@@ -85,5 +87,27 @@ class StompConfigTest {
             "/achelos_testfachdienst/topic", "/achelos_testfachdienst/queue", "/queue");
     assertThat(appPrefixes).containsExactly("/achelos_testfachdienst/app");
     assertThat(userPrefix).isEqualTo("/achelos_testfachdienst/user");
+  }
+
+  @Test
+  void exposesConfiguredHeartbeatIntervals() {
+    var config = new StompConfig();
+    ReflectionTestUtils.setField(config, "serverHeartbeatMs", 2_500L);
+    ReflectionTestUtils.setField(config, "clientHeartbeatMs", 4_000L);
+
+    var heartbeatValues =
+        (long[]) ReflectionTestUtils.invokeMethod(config, "resolveHeartbeatValues");
+
+    assertThat(heartbeatValues).containsExactly(2_500L, 4_000L);
+  }
+
+  @Test
+  void keepsTimeToFirstMessageDefaultAtSixtySeconds() throws NoSuchFieldException {
+    Field field = StompConfig.class.getDeclaredField("timeToFirstMessageMs");
+    Value valueAnnotation = field.getAnnotation(Value.class);
+
+    assertThat(valueAnnotation).isNotNull();
+    assertThat(valueAnnotation.value())
+        .isEqualTo("${app.websocket.transport.time-to-first-message-ms:60000}");
   }
 }

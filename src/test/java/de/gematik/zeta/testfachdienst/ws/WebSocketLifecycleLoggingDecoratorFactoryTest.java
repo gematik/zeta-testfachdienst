@@ -53,4 +53,17 @@ class WebSocketLifecycleLoggingDecoratorFactoryTest {
     verify(delegate).afterConnectionEstablished(session);
     verify(delegate).afterConnectionClosed(session, CloseStatus.NORMAL);
   }
+
+  @Test
+  void decoratorDelegatesTransportErrors() throws Exception {
+    WebSocketHandler delegate = org.mockito.Mockito.mock(WebSocketHandler.class);
+    WebSocketSession session = org.mockito.Mockito.mock(WebSocketSession.class);
+    when(session.getId()).thenReturn("s1");
+    Throwable error = new IllegalStateException("boom");
+
+    WebSocketHandler decorated = factory.decorate(delegate);
+    decorated.handleTransportError(session, error);
+
+    verify(delegate).handleTransportError(session, error);
+  }
 }
