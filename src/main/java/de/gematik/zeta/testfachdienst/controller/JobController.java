@@ -37,6 +37,7 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import org.jobrunr.scheduling.JobScheduler;
 import org.jobrunr.scheduling.RecurringJobBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -51,19 +52,18 @@ import org.springframework.web.bind.annotation.RestController;
     description = "Operational endpoints for background job scheduling and status inspection")
 public class JobController {
 
-  private final JobScheduler jobScheduler;
-  private final SelfDisclosureExportService selfDisclosureExportService;
-
   /**
    * Constructor for controller that also initiates job scheduling.
    *
    * @param scheduler Scheduler service from jobrunr
    * @param service Export service that provides method to be run in a job
+   * @param selfDisclosureIntervalSeconds self-disclosure interval in seconds
    */
-  public JobController(JobScheduler scheduler, SelfDisclosureExportService service) {
-    this.jobScheduler = scheduler;
-    this.selfDisclosureExportService = service;
-    scheduleInitial(jobScheduler, service);
+  public JobController(
+      JobScheduler scheduler,
+      SelfDisclosureExportService service,
+      @Value("${selfdisclosure.export.intervalSeconds}") long selfDisclosureIntervalSeconds) {
+    scheduleInitial(scheduler, service, selfDisclosureIntervalSeconds);
   }
 
   /**
@@ -71,12 +71,14 @@ public class JobController {
    *
    * @param scheduler JobRunr scheduler used to create the recurring job
    * @param service export service invoked by the scheduled job
+   * @param intervalSeconds self-disclosure interval in seconds
    */
-  private void scheduleInitial(JobScheduler scheduler, SelfDisclosureExportService service) {
+  private void scheduleInitial(
+      JobScheduler scheduler, SelfDisclosureExportService service, long intervalSeconds) {
     scheduler.createRecurrently(
         RecurringJobBuilder.aRecurringJob()
             .withId("self-disclosure-export")
-            .withInterval(Duration.of(service.getExportIntervalInSeconds(), ChronoUnit.SECONDS))
+            .withInterval(Duration.of(intervalSeconds, ChronoUnit.SECONDS))
             .withDetails(service::exportSelfDisclosure)
     );
   }

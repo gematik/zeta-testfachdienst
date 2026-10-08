@@ -25,33 +25,20 @@
 
 package de.gematik.zeta.testfachdienst.service;
 
-import de.gematik.zeta.testfachdienst.config.SelfDisclosureProperties;
-import java.util.LinkedHashMap;
 import java.util.Map;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 /**
- * Service to provide self disclosure information about the application.
+ * Self-disclosure event data that is written as a structured log record.
+ *
+ * @param body       human-readable log body
+ * @param attributes structured attributes attached to the log event
  */
-@Service
-@RequiredArgsConstructor
-public class SelfDisclosureService {
-
-  private final SelfDisclosureProperties props;
+public record SelfDisclosureRecord(String body, Map<String, String> attributes) {
 
   /**
-   * Builds the structured self-disclosure record from configured resource attributes.
-   *
-   * @return structured self-disclosure record
+   * Creates a self-disclosure record with immutable attributes.
    */
-  public SelfDisclosureRecord generateSelfDisclosureRecord() {
-    Map<String, String> attributes = new LinkedHashMap<>(props.getResourceAttributes());
-    String podName = System.getenv("HOSTNAME");
-    if (podName != null && !podName.isBlank()) {
-      attributes.put("pod_name", podName);
-    }
-
-    return new SelfDisclosureRecord("Selbstauskunft", attributes);
+  public SelfDisclosureRecord {
+    attributes = Map.copyOf(attributes);
   }
 }

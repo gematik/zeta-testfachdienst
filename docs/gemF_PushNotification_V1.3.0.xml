@@ -1,0 +1,1477 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<requirements xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://gemspec.gematik.de/schemas/afoListeSpezifikation_v2.xsd">
+  <requirement id="A_27104" type="leafRequirement" severity="MUSS" lastUpdate="2025-11-27" technicalID="ML-165468" revision="1552241">
+    <title><![CDATA[Fachdienst - Push Notifications - OpenApi_Notification_Fachdienst]]></title>
+    <description><![CDATA[Der Fachdienst MUSS eine API mit den Endpunkten GET /pushers und POST /pushers/set anbieten.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Der Fachdienst MUSS eine&nbsp;API&nbsp;mit den Endpunkten GET /pushers und POST&nbsp;<span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">/pushers/set</span> anbieten.<span id="polarion-comment:33"></span>
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>funkt. Eignung: Test Produkt/FA</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>Aktensystem_ePA</configElement>
+      <configElement>eRp_FD</configElement>
+    </configElements>
+    <chapterNumber>5.1.1</chapterNumber>
+    <chapterName>Pusher registrieren</chapterName>
+  </requirement>
+  <requirement id="A_27154" type="leafRequirement" severity="MUSS" lastUpdate="2025-11-27" technicalID="ML-165957" revision="1552241">
+    <title><![CDATA[Fachdienst - FdV-Instanz registrieren - App-Registrierung anlegen]]></title>
+    <description><![CDATA[Der Fachdienst MUSS beim Aufruf der Operation POST /pushers/set prüfen, ob zu pushkey und app_id eine App-Registrierung existiert und bei negativem Ergebnis eine neue App-Registrierung mit den Daten aus dem Aufruf anlegen.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Der Fachdienst MUSS beim Aufruf der Operation&nbsp;<span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">POST /pushers/set</span>&nbsp;prüfen, ob zu&nbsp;<span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">pushkey</span>&nbsp;und <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">app_id</span>&nbsp;eine App-Registrierung existiert und bei negativem Ergebnis&nbsp;eine neue App-Registrierung mit den Daten aus dem Aufruf anlegen.
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>funkt. Eignung: Herstellererklärung</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>Aktensystem_ePA</configElement>
+      <configElement>eRp_FD</configElement>
+    </configElements>
+    <chapterNumber>5.1.1</chapterNumber>
+    <chapterName>Pusher registrieren</chapterName>
+  </requirement>
+  <requirement id="A_27155" type="leafRequirement" severity="MUSS" lastUpdate="2025-11-27" technicalID="ML-165962" revision="1552241">
+    <title><![CDATA[Fachdienst - FdV-Instanz registrieren - App-Registrierung aktualisieren]]></title>
+    <description><![CDATA[Der Fachdienst MUSS beim Aufruf der Operation POST /pushers/set prüfen, ob zu pushkey und app_id eine App-Registrierung existiert und bei positivem Ergebnis, wenn kind nicht null ist,
+  
+   diese App-Registrierung mit den Daten aus dem Aufruf aktualisieren,
+   eventuell gespeichertes kryptographisches Schlüsselmaterial (shared-secret-Jahr-Monat, AES/GCM-Schlüssel-Jahr-Monat) vor der neuen initialen Schlüsselableitung löschen.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Der Fachdienst MUSS beim Aufruf der Operation <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">POST /pushers/set</span> prüfen, ob zu <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">pushkey</span> und <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">app_id</span> eine App-Registrierung existiert und bei positivem Ergebnis, wenn <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">kind</span> nicht <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">null</span> ist,
+  <ul>
+   <li>diese App-Registrierung mit den Daten aus dem Aufruf aktualisieren,</li>
+   <li>eventuell gespeichertes kryptographisches Schlüsselmaterial (<span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">shared-secret-Jahr-Monat</span>, <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">AES/GCM-Schlüssel-Jahr-Monat</span>) vor der neuen initialen Schlüsselableitung löschen.</li>
+  </ul>
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>funkt. Eignung: Herstellererklärung</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>Aktensystem_ePA</configElement>
+      <configElement>eRp_FD</configElement>
+    </configElements>
+    <chapterNumber>5.1.1</chapterNumber>
+    <chapterName>Pusher registrieren</chapterName>
+  </requirement>
+  <requirement id="A_27156" type="leafRequirement" severity="MUSS" lastUpdate="2025-11-27" technicalID="ML-165960" revision="1552241">
+    <title><![CDATA[Fachdienst - FdV-Instanz deregistrieren - App-Registrierung löschen]]></title>
+    <description><![CDATA[Der Fachdienst MUSS beim Aufruf der Operation POST /pushers/set prüfen, ob zu pushkey und app_id eine App-Registrierung existiert und bei positivem Ergebnis, wenn kind null ist,
+  
+   diese App-Registrierung mit den Daten aus dem Aufruf löschen,
+   eventuell gespeichertes kryptographisches Schlüsselmaterial (shared-secret-Jahr-Monat, AES/GCM-Schlüssel-Jahr-Monat) löschen]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Der Fachdienst MUSS beim Aufruf der Operation <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">POST /pushers/set</span> prüfen, ob zu <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">pushkey</span> und <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">app_id</span> eine App-Registrierung existiert und bei positivem Ergebnis, wenn <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">kind</span> <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">null</span> ist,
+  <ul>
+   <li>diese App-Registrierung mit den Daten aus dem Aufruf löschen,</li>
+   <li>eventuell gespeichertes kryptographisches Schlüsselmaterial (<span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">shared-secret-Jahr-Monat</span>, <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">AES/GCM-Schlüssel-Jahr-Monat</span>) löschen</li>
+  </ul>
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>funkt. Eignung: Herstellererklärung</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>Aktensystem_ePA</configElement>
+      <configElement>eRp_FD</configElement>
+    </configElements>
+    <chapterNumber>5.1.1</chapterNumber>
+    <chapterName>Pusher registrieren</chapterName>
+  </requirement>
+  <requirement id="A_27157" type="leafRequirement" severity="MUSS" lastUpdate="2025-09-10" technicalID="ML-165961" revision="1552241">
+    <title><![CDATA[Fachdienst - FdV-Instanz registrieren – Initiale Schlüsselableitung]]></title>
+    <description><![CDATA[Der Fachdienst MUSS beim Aufruf der Operation POST /pushers/set auf Basis des übermittelten initial shared secret (iss) eine Schlüsselableitung zum Jahr und Monat von time_iss_created vornehmen und das kryptographische Material (shared-secret-Jahr-Monat, AES/GCM-Schlüssel-Jahr-Monat) zur App-Registrierung speichern.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Der Fachdienst MUSS beim Aufruf der Operation <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">POST /pushers/set</span> auf Basis des übermittelten initial shared secret (<span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">iss</span>)<span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;"><span id="polarion-comment:90"></span></span> eine Schlüsselableitung zum Jahr und Monat von <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">time_iss_created</span> vornehmen und das kryptographische Material (<span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">shared-secret-Jahr-Monat</span>, <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">AES/GCM-Schlüssel-Jahr-Monat</span>) zur App-Registrierung&nbsp;speichern.<span id="polarion-comment:14"></span>
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>Sich.techn. Eignung: Produktgutachten</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>Aktensystem_ePA</configElement>
+      <configElement>eRp_FD</configElement>
+    </configElements>
+    <chapterNumber>5.1.1</chapterNumber>
+    <chapterName>Pusher registrieren</chapterName>
+  </requirement>
+  <requirement id="A_27158-01" type="leafRequirement" severity="MUSS" lastUpdate="2025-12-12" technicalID="ML-181863" revision="1552241">
+    <title><![CDATA[Fachdienst - Schlüsselableitung shared-secret-Jahr-Monat und AES/GCM-Schlüssel-Jahr-Monat]]></title>
+    <description><![CDATA[Der Fachdienst MUSS für die Anwendungsfälle für Push Notifications mit Verschlüsselung für die Verschlüsselung eine Schlüsselableitung mittels der HKDF [RFC-5869] auf Basis der Hashfunktion SHA-256 und dem Schlüsselmaterial (IKM) shared-secret-Jahr-Monat nutzen um 64 Byte abzuleiten, dabei MUSS als Ableitungsvektor (info-Parameter [RFC-5869]) yyyy-MM verwendet werden. ]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Der Fachdienst MUSS für die Anwendungsfälle für Push Notifications mit Verschlüsselung für die Verschlüsselung eine Schlüsselableitung mittels der HKDF [RFC-5869]&nbsp;auf Basis der Hashfunktion SHA-256 und dem Schlüsselmaterial (IKM) <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">shared-secret-Jahr-Monat</span> nutzen um 64 Byte abzuleiten, dabei MUSS als Ableitungsvektor (info-Parameter [RFC-5869]) <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">yyyy-MM</span>&nbsp;verwendet werden.&nbsp;
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>Sich.techn. Eignung: Produktgutachten</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>Aktensystem_ePA</configElement>
+      <configElement>eRp_FD</configElement>
+    </configElements>
+    <chapterName>Fachdienst - Schlüsselableitung shared-secret-Jahr-Monat und AES/GCM-Schlüssel-Jahr-Monat</chapterName>
+  </requirement>
+  <requirement id="A_27160" type="leafRequirement" severity="MUSS" lastUpdate="2025-09-10" technicalID="ML-165968" revision="1552241">
+    <title><![CDATA[Fachdienst - Push Notification senden – Schlüsselableitung]]></title>
+    <description><![CDATA[Der Fachdienst MUSS beim Auftreten eines Triggers für Push Notifications prüfen, ob für den Versicherten eine App-Registrierung existiert, und bei positivem Ergebnis, für jede App-Registrierung prüfen, ob für die App-Registrierung ein Schlüssel zum aktuellen Zeitpunkt (AES/GCM-Schlüssel-Jahr-Monat) gespeichert ist und falls nicht, basierend auf dem jüngsten vorliegenden Geheimnis (shared-secret-Jahr-Monat) schrittweise Schlüsselmaterial zu dessen Folgemonaten ableiten und speichern, bis die Schlüssel für den aktuellen Zeitpunkt vorliegen.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Der Fachdienst MUSS beim Auftreten eines Triggers für Push Notifications prüfen, ob für den Versicherten eine App-Registrierung existiert, und bei positivem Ergebnis, für jede App-Registrierung prüfen, ob für die App-Registrierung ein Schlüssel zum aktuellen Zeitpunkt (<span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">AES/GCM-Schlüssel-Jahr-Monat</span>) gespeichert ist und falls nicht, basierend auf dem jüngsten vorliegenden Geheimnis (<span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">shared-secret-Jahr-Monat</span>) schrittweise Schlüsselmaterial zu dessen Folgemonaten ableiten und speichern, bis die Schlüssel für den aktuellen Zeitpunkt&nbsp;vorliegen.
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>Sich.techn. Eignung: Produktgutachten</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>Aktensystem_ePA</configElement>
+      <configElement>eRp_FD</configElement>
+    </configElements>
+    <chapterNumber>5.1.2</chapterNumber>
+    <chapterName>Operation Notify</chapterName>
+  </requirement>
+  <requirement id="A_27405" type="leafRequirement" severity="MUSS" lastUpdate="2025-09-10" technicalID="ML-167289" revision="1552241">
+    <title><![CDATA[Fachdienst - Schlüsselableitung - Alte Schlüssel löschen]]></title>
+    <description><![CDATA[Der Fachdienst MUSS nach jeder Schlüsselableitung alle Geheimnisse (shared-secret-Jahr-Monat) und Schlüssel (AES/GCM-Schlüssel-Jahr-Monat) für Push Notifications löschen, die älter als das jüngste Schlüsselmaterial sind.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Der Fachdienst MUSS nach jeder Schlüsselableitung alle Geheimnisse (shared-secret-Jahr-Monat) und Schlüssel (<span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">AES/GCM-Schlüssel-Jahr-Monat</span>) für Push Notifications löschen, die älter als das jüngste Schlüsselmaterial sind.
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>Sich.techn. Eignung: Produktgutachten</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>Aktensystem_ePA</configElement>
+      <configElement>eRp_FD</configElement>
+    </configElements>
+    <chapterNumber>5.1.2</chapterNumber>
+    <chapterName>Operation Notify</chapterName>
+  </requirement>
+  <requirement id="A_27680" type="leafRequirement" severity="MUSS" lastUpdate="2025-09-10" technicalID="ML-171158" revision="1552241">
+    <title><![CDATA[Fachdienst - Push Notification senden - Nachricht kodieren]]></title>
+    <description><![CDATA[Der Fachdienst MUSS den Nachrichteninhalt der Push Notifications mit UTF-8 kodieren.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>Der Fachdienst MUSS den Nachrichteninhalt der Push Notifications mit UTF-8 kodieren.</body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>funkt. Eignung: Test Produkt/FA</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>Aktensystem_ePA</configElement>
+      <configElement>eRp_FD</configElement>
+    </configElements>
+    <chapterNumber>5.1.2</chapterNumber>
+    <chapterName>Operation Notify</chapterName>
+  </requirement>
+  <requirement id="A_27161" type="leafRequirement" severity="MUSS" lastUpdate="2025-09-10" technicalID="ML-165969" revision="1552241">
+    <title><![CDATA[Fachdienst - Push Notification senden – Nachricht verschlüsseln]]></title>
+    <description><![CDATA[Der Fachdienst MUSS, wenn der Fachdienst Notifications verschlüsselt senden muss, beim Auftreten eines Triggers für Push Notifications prüfen, ob für den Versicherten eine App-Registrierung existiert und bei positivem Ergebnis, für jede App-Registrierung den Nachrichteninhalt mit dem Schlüssel aus der aktuellen Schlüsselableitung nach AES/GCM verschlüsseln und als Base64(IV || Ciphertext || Authentication Code) im Attribut ciphertext beim Erstellen der Push Notification verwenden.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Der Fachdienst MUSS, wenn<span id="polarion-comment:16"></span> der Fachdienst Notifications verschlüsselt senden muss, beim Auftreten eines Triggers für Push Notifications prüfen, ob für den Versicherten eine App-Registrierung existiert und bei positivem Ergebnis, für jede App-Registrierung den Nachrichteninhalt mit dem Schlüssel aus der aktuellen Schlüsselableitung nach&nbsp;AES/GCM&nbsp;verschlüsseln und&nbsp;als <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">Base64(IV || Ciphertext || Authentication Code)</span> im Attribut&nbsp;<span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">ciphertext</span>&nbsp;beim Erstellen der Push Notification verwenden.
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>Sich.techn. Eignung: Produktgutachten</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>Aktensystem_ePA</configElement>
+      <configElement>eRp_FD</configElement>
+    </configElements>
+    <chapterNumber>5.1.2</chapterNumber>
+    <chapterName>Operation Notify</chapterName>
+  </requirement>
+  <requirement id="A_27610" type="leafRequirement" severity="MUSS" lastUpdate="2025-09-10" technicalID="ML-170245" revision="1552241">
+    <title><![CDATA[Fachdienst - Push Notification senden - Größe des Nachrichteninhalts verschleiern]]></title>
+    <description><![CDATA[Der Fachdienst MUSS, wenn der Fachdienst Notifications verschlüsselt senden muss, den in der Push Notification zu übermittelnden Nachrichteninhalt mit einer Größe von genau 1024 Bytes vor der Verschlüsselung wie folgt kodieren. Es werden folgende Daten konkateniert
+  
+
+  
+   die Zeichenkette "PNM1" (4 Bytes),
+   zwei Bytes Länge des folgenden Leerzeichenabschnitts im Network-Byte-Order (big-endian) berechnet mit:
+    
+
+     maximale_verfügbare_Größe_für_Nachrichteninhalt - 4 - 2 - Länge(eigentliche Nachricht) 
+   Anzahl von Leerzeichen (Character 32) wie bei 2 angeführt,
+   eigentliche Nachricht.
+  
+  Die Konkatenation ist dann der zu verschlüsselnde Klartext.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Der Fachdienst MUSS<span style="font-size: 10pt;line-height: 1.5;">, wenn der Fachdienst Notifications verschlüsselt senden muss,</span> den in der Push Notification zu übermittelnden Nachrichteninhalt mit einer Größe von genau 1024 Bytes vor der Verschlüsselung wie folgt kodieren. Es werden folgende Daten konkateniert
+  <br>
+  <ol>
+   <li>die Zeichenkette "PNM1" (4 Bytes),</li>
+   <li>zwei Bytes Länge des folgenden Leerzeichenabschnitts im Network-Byte-Order (big-endian) berechnet mit:
+    <br>
+    &nbsp;maximale_verfügbare_Größe_für_Nachrichteninhalt - 4 - 2 - Länge(eigentliche Nachricht)&nbsp;</li>
+   <li>Anzahl von Leerzeichen (Character 32) wie bei 2 angeführt,</li>
+   <li>eigentliche Nachricht.</li>
+  </ol>
+  Die Konkatenation ist dann der zu verschlüsselnde Klartext.
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>Sich.techn. Eignung: Produktgutachten</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>Aktensystem_ePA</configElement>
+      <configElement>eRp_FD</configElement>
+    </configElements>
+    <chapterNumber>5.1.2</chapterNumber>
+    <chapterName>Operation Notify</chapterName>
+  </requirement>
+  <requirement id="A_27162" type="leafRequirement" severity="MUSS" lastUpdate="2025-09-10" technicalID="ML-165966" revision="1552241">
+    <title><![CDATA[Fachdienst - Push Notification senden – Einbetten des Zeitstempels]]></title>
+    <description><![CDATA[Der Fachdienst MUSS bei der Verschlüsselung einer Push Notification den Zeitpunkt der Schlüsselableitung im Format "yyyy-MM" in den metadaten (time_message_encrypted) der Push Notification einbetten.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Der Fachdienst MUSS&nbsp;bei der Verschlüsselung einer Push Notification den Zeitpunkt der Schlüsselableitung im Format <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">"yyyy-MM"<span id="polarion-comment:18"></span></span> in den metadaten (<span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">time_message_encrypted</span>)&nbsp;der Push Notification einbetten.
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>funkt. Eignung: Herstellererklärung</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>Aktensystem_ePA</configElement>
+      <configElement>eRp_FD</configElement>
+    </configElements>
+    <chapterNumber>5.1.2</chapterNumber>
+    <chapterName>Operation Notify</chapterName>
+  </requirement>
+  <requirement id="A_27163" type="leafRequirement" severity="MUSS" lastUpdate="2025-11-27" technicalID="ML-165967" revision="1552241">
+    <title><![CDATA[Fachdienst - Push Notification senden - Aufruf Push Gateway]]></title>
+    <description><![CDATA[Der Fachdienst MUSS beim Auftreten eines Triggers für Push Notifications prüfen, ob für den Versicherten eine App-Registrierung existiert und bei positivem Ergebnis für jede App-Registrierung den gespeicherten Endpunkt des Push Gateways unter Verwendung von [OpenApi_Notification_PushGateway] aufrufen.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Der<span id="polarion-comment:19"></span> Fachdienst MUSS beim Auftreten eines Triggers für Push Notifications prüfen, ob für den Versicherten eine App-Registrierung existiert und bei positivem Ergebnis für jede App-Registrierung den gespeicherten Endpunkt des Push Gateways unter Verwendung von [OpenApi_Notification_PushGateway] aufrufen.
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>funkt. Eignung: Herstellererklärung</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>Aktensystem_ePA</configElement>
+      <configElement>eRp_FD</configElement>
+    </configElements>
+    <chapterNumber>5.1.2</chapterNumber>
+    <chapterName>Operation Notify</chapterName>
+  </requirement>
+  <requirement id="A_27652" type="leafRequirement" severity="MUSS" lastUpdate="2025-11-07" technicalID="ML-171003" revision="1552241">
+    <title><![CDATA[Fachdienst - Push Notification senden - Hinterlegte URL]]></title>
+    <description><![CDATA[Der Fachdienst MUSS sicherstellen, dass Push Notifications ausschließlich an die in der Registrierung der FdV-Instanz hinterlegte URL (aus: data/url) übermittelt werden.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Der Fachdienst MUSS sicherstellen,<span id="polarion-comment:136"></span> dass Push Notifications ausschließlich an die in der Registrierung der FdV-Instanz hinterlegte URL&nbsp;(aus:&nbsp;<span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">data/url</span>) übermittelt werden.
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>Sich.techn. Eignung: Produktgutachten</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>Aktensystem_ePA</configElement>
+      <configElement>eRp_FD</configElement>
+    </configElements>
+    <chapterNumber>5.1.2</chapterNumber>
+    <chapterName>Operation Notify</chapterName>
+  </requirement>
+  <requirement id="A_27374" type="leafRequirement" severity="MUSS" lastUpdate="2025-11-27" technicalID="ML-167204" revision="1552241">
+    <title><![CDATA[Fachdienst - Push Notification senden - Aufruf Push Gateway Response verarbeiten]]></title>
+    <description><![CDATA[Der Fachdienst MUSS beim Versenden von Push Notification über ein Push Gateway das Ergebnis des Aufrufs verarbeiten und gegebenenfalls ungültig gewordene Pusher löschen.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Der Fachdienst MUSS beim Versenden von Push Notification<span id="polarion-comment:21"></span> über ein Push Gateway das Ergebnis des Aufrufs verarbeiten und gegebenenfalls ungültig gewordene Pusher löschen.
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>funkt. Eignung: Herstellererklärung</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>Aktensystem_ePA</configElement>
+      <configElement>eRp_FD</configElement>
+    </configElements>
+    <chapterNumber>5.1.2</chapterNumber>
+    <chapterName>Operation Notify</chapterName>
+  </requirement>
+  <requirement id="A_27436" type="leafRequirement" severity="DARF NICHT" lastUpdate="2025-11-27" technicalID="ML-167393" revision="1552241">
+    <title><![CDATA[Fachdienst – Keine personenbezogenen Klartextdaten in Push Notifications]]></title>
+    <description><![CDATA[Der Fachdienst DARF NICHT Push Notifications erzeugen und ans Push Gateway übermitteln, die unverschlüsselte personenbezogene Daten enthalten.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>Der Fachdienst DARF NICHT Push Notifications erzeugen und ans Push Gateway übermitteln, die unverschlüsselte personenbezogene Daten enthalten.</body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>Sich.techn. Eignung: Produktgutachten</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>Aktensystem_ePA</configElement>
+      <configElement>eRp_FD</configElement>
+    </configElements>
+    <chapterNumber>5.1.2</chapterNumber>
+    <chapterName>Operation Notify</chapterName>
+  </requirement>
+  <requirement id="A_27166" type="leafRequirement" severity="MUSS" lastUpdate="2025-11-27" technicalID="ML-165977" revision="1552241">
+    <title><![CDATA[Fachdienst - Exponential Back-off bei Fehlern im Versand an Push Gateway]]></title>
+    <description><![CDATA[Der Fachdienst MUSS bei Nichtverfügbarkeit des Push Gateways oder Fehlern beim Versand von Push Notifications die zu versendenden Push Notifications puffern und weitere Sendeversuche nach dem Prinzip des "exponential back-off" unternehmen, bis alle Push Notifications versendet wurden.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Der Fachdienst MUSS bei Nichtverfügbarkeit des Push Gateways oder Fehlern beim Versand von Push Notifications die zu versendenden Push Notifications puffern und weitere Sendeversuche nach dem Prinzip des "exponential back-off" unternehmen, bis alle Push Notifications versendet wurden.<span id="polarion-comment:116"></span>
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>funkt. Eignung: Herstellererklärung</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>Aktensystem_ePA</configElement>
+      <configElement>eRp_FD</configElement>
+    </configElements>
+    <chapterNumber>5.1.2</chapterNumber>
+    <chapterName>Operation Notify</chapterName>
+  </requirement>
+  <requirement id="A_28211" type="leafRequirement" severity="KANN" lastUpdate="2025-11-21" technicalID="ML-179165" revision="1552241">
+    <title><![CDATA[Fachdienst - Push Notification Stapelverarbeitung]]></title>
+    <description><![CDATA[Der Fachdienst KANN  beim Senden von Push Notifications mehrere Push Notifications, die an denselben Endpunkt eines Push Gateways geschickt werden, gemeinsam in einer Stapelverarbeitung bearbeiten.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Der Fachdienst KANN <span style="text-decoration: line-through;background-color: #FFFF33;"> </span>beim Senden von Push Notifications mehrere Push Notifications, die an denselben Endpunkt eines Push Gateways geschickt werden, gemeinsam in einer Stapelverarbeitung bearbeiten.
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>funkt. Eignung: Herstellererklärung</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>eRp_FD</configElement>
+    </configElements>
+    <chapterNumber>5.1.3</chapterNumber>
+    <chapterName>5.1.3 Festlegungen zur Stapelverarbeitung von Push Notifications</chapterName>
+  </requirement>
+  <requirement id="A_28212" type="leafRequirement" severity="MUSS" lastUpdate="2025-10-27" technicalID="ML-179167" revision="1552241">
+    <title><![CDATA[Fachdienst - Push Notifications Stapelverarbeitung - Konfigurationsparameter MAX_BATCH_TIME]]></title>
+    <description><![CDATA[Der Fachdienst MUSS, wenn der Fachdienst Push Notifications in einer Stapelverarbeitung bearbeitet, einen Konfigurationsparameter MAX_BATCH_TIME (der Standardwert ist 1 Sekunde) verwalten. ]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>Der Fachdienst MUSS, wenn der Fachdienst Push Notifications in einer Stapelverarbeitung bearbeitet, einen Konfigurationsparameter MAX_BATCH_TIME (der Standardwert ist 1 Sekunde) verwalten.&nbsp;</body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>funkt. Eignung: Herstellererklärung</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>Aktensystem_ePA</configElement>
+      <configElement>eRp_FD</configElement>
+    </configElements>
+    <chapterNumber>5.1.3</chapterNumber>
+    <chapterName>5.1.3 Festlegungen zur Stapelverarbeitung von Push Notifications</chapterName>
+  </requirement>
+  <requirement id="A_28213" type="leafRequirement" severity="DARF NICHT" lastUpdate="2025-11-19" technicalID="ML-179168" revision="1552241">
+    <title><![CDATA[Fachdienst - Push Notifications Stapelverarbeitung - Konfigurationsparameter MAX_BATCH_TIME Obergrenze]]></title>
+    <description><![CDATA[Der Fachdienst DARF, wenn der Fachdienst Push Notifications in einer Stapelverarbeitung bearbeitet, NICHT den Konfigurationsparameter MAX_BATCH_TIME höher als 10 Sekunden setzen.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>Der Fachdienst DARF, wenn der Fachdienst Push Notifications in einer Stapelverarbeitung bearbeitet, NICHT den Konfigurationsparameter MAX_BATCH_TIME höher als 10 Sekunden setzen.</body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>funkt. Eignung: Herstellererklärung</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>Aktensystem_ePA</configElement>
+    </configElements>
+    <chapterNumber>5.1.3</chapterNumber>
+    <chapterName>5.1.3 Festlegungen zur Stapelverarbeitung von Push Notifications</chapterName>
+  </requirement>
+  <requirement id="A_28214" type="leafRequirement" severity="MUSS" lastUpdate="2025-10-27" technicalID="ML-179169" revision="1552241">
+    <title><![CDATA[Fachdienst - Push Notification Stapelverarbeitung - Maximal-Frist]]></title>
+    <description><![CDATA[Der Fachdienst MUSS, wenn der Fachdienst Push Notifications in einer Stapelverarbeitung bearbeitet, die Push Notifications innerhalb der durch den Fachdienst definierten maximalen Zeit (MAX_BATCH_TIME) an das Push Gateway senden.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>Der Fachdienst MUSS, wenn der Fachdienst Push Notifications in einer Stapelverarbeitung bearbeitet, die Push Notifications innerhalb der durch den Fachdienst definierten maximalen Zeit (MAX_BATCH_TIME) an das Push Gateway senden.</body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>Sich.techn. Eignung: Produktgutachten</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>Aktensystem_ePA</configElement>
+      <configElement>eRp_FD</configElement>
+    </configElements>
+    <chapterNumber>5.1.3</chapterNumber>
+    <chapterName>5.1.3 Festlegungen zur Stapelverarbeitung von Push Notifications</chapterName>
+  </requirement>
+  <requirement id="A_28215" type="leafRequirement" severity="MUSS" lastUpdate="2025-10-27" technicalID="ML-179170" revision="1552241">
+    <title><![CDATA[Fachdienst - Push Notifications Stapelverarbeitung - Konfigurationsparameter MAX_BATCH_COUNT]]></title>
+    <description><![CDATA[Der Fachdienst MUSS, wenn der Fachdienst Push Notifications in einer Stapelverarbeitung bearbeitet, einen Konfigurationsparameter MAX_BATCH_COUNT (der Standardwert ist 100 Push Notifications) verwalten.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>Der Fachdienst MUSS, wenn der Fachdienst Push Notifications in einer Stapelverarbeitung bearbeitet, einen Konfigurationsparameter MAX_BATCH_COUNT (der Standardwert ist 100 Push Notifications) verwalten.</body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>funkt. Eignung: Herstellererklärung</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>Aktensystem_ePA</configElement>
+      <configElement>eRp_FD</configElement>
+    </configElements>
+    <chapterNumber>5.1.3</chapterNumber>
+    <chapterName>5.1.3 Festlegungen zur Stapelverarbeitung von Push Notifications</chapterName>
+  </requirement>
+  <requirement id="A_28216" type="leafRequirement" severity="DARF NICHT" lastUpdate="2025-10-27" technicalID="ML-179171" revision="1552241">
+    <title><![CDATA[Fachdienst - Push Notifications Stapelverarbeitung - Konfigurationsparameter MAX_BATCH_COUNT Obergrenze]]></title>
+    <description><![CDATA[Der Fachdienst DARF, wenn der Fachdienst Push Notifications in einer Stapelverarbeitung bearbeitet, NICHT den Konfigurationsparameter MAX_BATCH_COUNT höher als 100 Push Notifications setzen.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>Der Fachdienst DARF, wenn der Fachdienst Push Notifications in einer Stapelverarbeitung bearbeitet, NICHT den Konfigurationsparameter MAX_BATCH_COUNT höher als 100 Push Notifications setzen.</body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>funkt. Eignung: Herstellererklärung</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>Aktensystem_ePA</configElement>
+      <configElement>eRp_FD</configElement>
+    </configElements>
+    <chapterNumber>5.1.3</chapterNumber>
+    <chapterName>5.1.3 Festlegungen zur Stapelverarbeitung von Push Notifications</chapterName>
+  </requirement>
+  <requirement id="A_28217" type="leafRequirement" severity="DARF NICHT" lastUpdate="2025-10-27" technicalID="ML-179172" revision="1552241">
+    <title><![CDATA[Fachdienst - Push Notification Stapelverarbeitung - Maximalanzahl Push Notifications]]></title>
+    <description><![CDATA[Der Fachdienst DARF, wenn der Fachdienst Push Notifications in einer Stapelverarbeitung bearbeitet, NICHT mehr als die durch den Fachdienst definierte maximale Anzahl von Push Notifications pro Stapel (MAX_BATCH_COUNT) in einem Aufruf an das Push Gateway senden.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>Der Fachdienst DARF, wenn der Fachdienst Push Notifications in einer Stapelverarbeitung bearbeitet, NICHT mehr als die durch den Fachdienst definierte maximale Anzahl von Push Notifications pro Stapel (MAX_BATCH_COUNT) in einem Aufruf an das Push Gateway senden.</body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>funkt. Eignung: Test Produkt/FA</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>Aktensystem_ePA</configElement>
+      <configElement>eRp_FD</configElement>
+    </configElements>
+    <chapterNumber>5.1.3</chapterNumber>
+    <chapterName>5.1.3 Festlegungen zur Stapelverarbeitung von Push Notifications</chapterName>
+  </requirement>
+  <requirement id="A_27164" type="leafRequirement" severity="MUSS" lastUpdate="2025-11-04" technicalID="ML-165972" revision="1552241">
+    <title><![CDATA[Push Gateway - OpenApi_Notification_PushGateway]]></title>
+    <description><![CDATA[Das Push Gateway MUSS eine API gemäß [OpenApi_Notification_PushGateway] anbieten.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>Das Push Gateway MUSS eine API gemäß [OpenApi_Notification_PushGateway] anbieten.</body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>funkt. Eignung: Herstellererklärung</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>FdV_Option_PushNotification</configElement>
+    </configElements>
+    <chapterNumber>5.2</chapterNumber>
+    <chapterName>Anforderungen an das Push Gateway</chapterName>
+  </requirement>
+  <requirement id="A_27165-01" type="leafRequirement" severity="MUSS" lastUpdate="2025-11-04" technicalID="ML-179173" revision="1552241">
+    <title><![CDATA[Push Gateway - Push Notification senden – Aufruf Push Provider]]></title>
+    <description><![CDATA[Das Push Gateway MUSS nach dem Aufruf der Endpunkte POST /notify, POST /notify/batch oder POST /notifyEncrypted/batch den entsprechenden Push Provider auswählen und einen Request für eine Push Notification an den Push Provider senden, sodass die Notification am FdV empfangen werden kann.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Das Push Gateway MUSS nach dem Aufruf&nbsp;der Endpunkte&nbsp;<span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">POST /notify, POST /notify/batch oder POST /notifyEncrypted/batch</span> den entsprechenden Push Provider auswählen und einen Request für eine Push Notification an den Push Provider senden, sodass die Notification am FdV empfangen werden kann.
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>funkt. Eignung: Herstellererklärung</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>FdV_Option_PushNotification</configElement>
+    </configElements>
+    <chapterNumber>5.2</chapterNumber>
+    <chapterName>Anforderungen an das Push Gateway</chapterName>
+  </requirement>
+  <requirement id="A_27512" type="leafRequirement" severity="MUSS" lastUpdate="2025-11-04" technicalID="ML-169201" revision="1552241">
+    <title><![CDATA[Push Gateway - Direkte Kommunikation mit Push Provider]]></title>
+    <description><![CDATA[Das Push Gateway MUSS sicherstellen, dass Push Notifications ausschließlich an den Plattformspezifischen Push Provider gesendet werden.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>Das Push Gateway MUSS sicherstellen, dass Push Notifications ausschließlich an den Plattformspezifischen Push Provider gesendet werden.</body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>Sich.techn. Eignung: Produktgutachten</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>FdV_Option_PushNotification</configElement>
+    </configElements>
+    <chapterNumber>5.2</chapterNumber>
+    <chapterName>Anforderungen an das Push Gateway</chapterName>
+  </requirement>
+  <requirement id="A_27539" type="leafRequirement" severity="MUSS" lastUpdate="2025-11-04" technicalID="ML-169249" revision="1552241">
+    <title><![CDATA[Push Gateway - Keine Verarbeitung unverschlüsselter personenbezogener Daten]]></title>
+    <description><![CDATA[Das Push Gateway MUSS sicherstellen, dass keine unverschlüsselten personenbezogenen Daten im Push Gateway verarbeitet werden.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>Das Push Gateway MUSS sicherstellen, dass keine unverschlüsselten personenbezogenen Daten im Push Gateway verarbeitet werden.</body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>Sich.techn. Eignung: Produktgutachten</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>FdV_Option_PushNotification</configElement>
+    </configElements>
+    <chapterNumber>5.2</chapterNumber>
+    <chapterName>Anforderungen an das Push Gateway</chapterName>
+  </requirement>
+  <requirement id="A_27611" type="leafRequirement" severity="MUSS" lastUpdate="2025-11-04" technicalID="ML-170248" revision="1552241">
+    <title><![CDATA[Push Gateway - Keine Rückschlüsse auf genutzte Anwendungen]]></title>
+    <description><![CDATA[Das Push Gateway MUSS sicherstellen, dass das Push Gateway an den Plattformspezifischen Push Provider keine Informationen zu Fachdiensten bzw. Anwendungen übermittelt.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>Das Push Gateway MUSS sicherstellen, dass das Push Gateway an den Plattformspezifischen Push Provider keine Informationen zu Fachdiensten bzw. Anwendungen übermittelt.</body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>Sich.techn. Eignung: Produktgutachten</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>FdV_Option_PushNotification</configElement>
+    </configElements>
+    <chapterNumber>5.2</chapterNumber>
+    <chapterName>Anforderungen an das Push Gateway</chapterName>
+  </requirement>
+  <requirement id="A_27435" type="leafRequirement" severity="MUSS" lastUpdate="2025-11-04" technicalID="ML-167392" revision="1552241">
+    <title><![CDATA[Push Gateway – Unverzügliches Löschen von Push Notification]]></title>
+    <description><![CDATA[Das Push Gateway MUSS Push Notifications nach Übermittlung an den Push Provider unverzüglich löschen.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Das Push Gateway MUSS Push Notifications nach Übermittlung an den Push Provider unverzüglich löschen.<span style="font-style: italic;color: #009900;"> </span>
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>Sich.techn. Eignung: Produktgutachten</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>FdV_Option_PushNotification</configElement>
+    </configElements>
+    <chapterNumber>5.2</chapterNumber>
+    <chapterName>Anforderungen an das Push Gateway</chapterName>
+  </requirement>
+  <requirement id="A_27757" type="leafRequirement" severity="MUSS" lastUpdate="2025-11-04" technicalID="ML-174276" revision="1552241">
+    <title><![CDATA[Push Gateway – Maximal-Frist für Push Notifications im Push Gateway]]></title>
+    <description><![CDATA[Das Push Gateway MUSS die Push Notification löschen, falls die Push Nachricht innerhalb von maximal 24 Stunden nicht an den Push Provider übermittelt werden konnte.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Das Push Gateway MUSS die Push Notification löschen, falls die Push Nachricht innerhalb von maximal 24 Stunden nicht an den Push Provider übermittelt werden konnte.
+  <br>
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>Sich.techn. Eignung: Produktgutachten</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>FdV_Option_PushNotification</configElement>
+    </configElements>
+    <chapterNumber>5.2</chapterNumber>
+    <chapterName>Anforderungen an das Push Gateway</chapterName>
+  </requirement>
+  <requirement id="A_27167" type="leafRequirement" severity="SOLL" lastUpdate="2025-11-04" technicalID="ML-165978" revision="1552241">
+    <title><![CDATA[Push Gateway - Prio Feld mappen]]></title>
+    <description><![CDATA[Das Push Gateway SOLL beim Aufruf des spezifizierten Endpunkts, wenn das Feld notification.prio vorhanden ist, diese Priorität an den Push Provider weitergeben.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Das Push Gateway SOLL beim Aufruf des spezifizierten Endpunkts, wenn&nbsp;das Feld&nbsp;<span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">notification.prio</span> vorhanden ist,&nbsp;diese Priorität an den Push Provider weitergeben.
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>funkt. Eignung: Herstellererklärung</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>FdV_Option_PushNotification</configElement>
+    </configElements>
+    <chapterNumber>5.2</chapterNumber>
+    <chapterName>Anforderungen an das Push Gateway</chapterName>
+  </requirement>
+  <requirement id="A_27170-01" type="leafRequirement" severity="MUSS" lastUpdate="2025-12-12" technicalID="ML-181864" revision="1552241">
+    <title><![CDATA[FdV: Push Notifications - Schlüsselableitung shared-secret-Jahr-Monat und AES/GCM-Schlüssel-Jahr-Monat]]></title>
+    <description><![CDATA[Das FdV MUSS, wenn einer der Fachdienste verschlüsselte Push Notifications versendet, für die Anwendungsfälle für Push Notifications eine Schlüsselableitung mittels der HKDF [RFC-5869] auf Basis der Hashfunktion SHA-256 und dem Schlüsselmaterial (IKM) shared-secret-Jahr-Monat nutzen um 64 Byte abzuleiten, dabei MUSS als Ableitungsvektor (info-Parameter [RFC-5869]) yyyy-MM verwendet werden. ]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Das&nbsp;FdV MUSS,&nbsp;wenn einer der Fachdienste verschlüsselte Push Notifications versendet, für die Anwendungsfälle für Push Notifications eine Schlüsselableitung mittels der HKDF [RFC-5869]&nbsp;auf Basis der Hashfunktion SHA-256 und dem Schlüsselmaterial (IKM) <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">shared-secret-Jahr-Monat</span> nutzen um 64 Byte abzuleiten, dabei MUSS als Ableitungsvektor (info-Parameter [RFC-5869]) <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">yyyy-MM</span>&nbsp;verwendet werden.&nbsp;
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>Sich.techn. Eignung: Produktgutachten</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>FdV_Option_PushNotification</configElement>
+    </configElements>
+    <chapterName>FdV: Push Notifications - Schlüsselableitung shared-secret-Jahr-Monat und AES/GCM-Schlüssel-Jahr-Monat</chapterName>
+  </requirement>
+  <requirement id="A_27168" type="leafRequirement" severity="MUSS" lastUpdate="2025-05-28" technicalID="ML-165976" revision="1552241">
+    <title><![CDATA[FdV: Push Notifications - Instanz registrieren - app_id]]></title>
+    <description><![CDATA[Das FdV MUSS im Anwendungsfall "FdV-Instanz registrieren" eine app_id haben, mit der sich das FdV für den Empfang von Push Notifications beim Fachdienst registrieren kann.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Das FdV MUSS im Anwendungsfall "FdV-Instanz registrieren" eine <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">app_id</span> haben, mit der sich das FdV für den Empfang von Push Notifications beim Fachdienst registrieren kann. <span id="polarion-comment:49"></span>
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>funkt. Eignung: Herstellererklärung</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>FdV_Option_PushNotification</configElement>
+    </configElements>
+    <chapterNumber>5.3.2</chapterNumber>
+    <chapterName>FdV-Instanz Registrieren</chapterName>
+  </requirement>
+  <requirement id="A_27171" type="leafRequirement" severity="MUSS" lastUpdate="2025-09-08" technicalID="ML-165988" revision="1552241">
+    <title><![CDATA[FdV: Push Notifications - Instanz registrieren - pushkey aktualisieren]]></title>
+    <description><![CDATA[Das FdV MUSS, wenn eine Einwilligung zum Empfang von Push Notifications vorliegt, nach dem Start der Anwendung überprüfen, ob sich das vom Push Provider zugewiesene pushkey geändert hat und in diesem Fall zuerst den alten pushkey löschen, und anschließend der Anwendungsfall "FdV-Instanz registrieren" durchführen.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Das FdV MUSS, wenn eine Einwilligung zum Empfang von Push Notifications vorliegt, nach dem Start der Anwendung überprüfen, ob sich das vom Push Provider zugewiesene pushkey geändert hat und in diesem Fall zuerst den alten pushkey&nbsp;löschen, und anschließend der Anwendungsfall "FdV-Instanz registrieren" durchführen.<span id="polarion-comment:32"></span>
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>funkt. Eignung: Herstellererklärung</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>FdV_Option_PushNotification</configElement>
+    </configElements>
+    <chapterNumber>5.3.2</chapterNumber>
+    <chapterName>FdV-Instanz Registrieren</chapterName>
+  </requirement>
+  <requirement id="A_27172" type="leafRequirement" severity="MUSS" lastUpdate="2025-05-28" technicalID="ML-165985" revision="1552241">
+    <title><![CDATA[FdV: Push Notifications - Instanz registrieren]]></title>
+    <description><![CDATA[Das FdV MUSS den Anwendungsfall "FdV-Instanz registrieren" gemäß TAB_FdV_Registrieren umsetzen.
+  
+
+  
+  Tabelle #: TAB_FdV_Registrieren – FdV-Instanz registrieren
+  
+   
+    
+     Name 
+     FdV-Instanz registrieren
+    
+    
+     Auslöser
+     
+      
+       Der Versicherte willigt in Push Notifications ein.
+        
+
+       Erneuerung des pushkey
+        
+
+      
+     
+    
+    
+     Akteur
+     Versicherter
+    
+    
+     Vorbedingung
+     
+      
+       Der Nutzer hat sich gegenüber dem Fachdienst authentisiert.
+      
+     
+    
+    
+     Nachbedingung
+     
+      
+       FdV-Instanz ist registriert am Fachdienst zum Empfang von Push Notifications.
+      
+     
+    
+    
+     Standardablauf
+     wenn der Fachdienst verschlüsselte Push Notifications versendet:
+      
+
+      
+       pushkey ermitteln
+       initial shared secret (iss)erzeugen
+       Aufruf zum Registrieren
+       Initiale Schlüsselableitung
+       Schlüssel speichern
+       initial shared secret (iss) löschen
+      
+      wenn der Fachdienst keine verschlüsselte Push Notifications versendet:
+      
+       pushkey von Push Provider ermitteln
+       Aufruf zum Registrieren]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Das&nbsp;FdV&nbsp;MUSS den Anwendungsfall "FdV-Instanz registrieren" gemäß TAB_FdV_Registrieren umsetzen.
+  <br>
+  <p data-keep-next="true" class="polarion-rte-caption-paragraph" style="text-align: left;"></p>
+  <p data-keep-next="true" class="polarion-rte-caption-paragraph" style="text-align: left;">Tabelle <span data-sequence="Tabelle" class="polarion-rte-caption">#</span>: TAB_FdV_Registrieren – FdV-Instanz registrieren</p>
+  <table id="polarion_wiki macro name=table;params=bold=1" class="polarion-Document-table" style="width: 100%;max-width: 1280px;margin-left: 0px;margin-right: auto;border: 1px solid #CCCCCC;empty-cells: show;border-collapse: collapse;max-width: 1280.0px;">
+   <tbody>
+    <tr>
+     <th style="font-weight: bold;background-color: #F0F0F0;text-align: left;vertical-align: top;width: 169px;height: 21px;border: 1px solid #CCCCCC;border-top: 1px solid #CCCCCC;border-bottom: 1px solid #CCCCCC;border-right: 1px solid #CCCCCC;border-left: 1px solid #CCCCCC;padding: 5px;">Name&nbsp;</th>
+     <th style="font-weight: bold;background-color: #F0F0F0;text-align: left;vertical-align: top;width: 562px;height: 21px;border: 1px solid #CCCCCC;border-top: 1px solid #CCCCCC;border-bottom: 1px solid #CCCCCC;border-right: 1px solid #CCCCCC;border-left: 1px solid #CCCCCC;padding: 5px;">FdV-Instanz registrieren</th>
+    </tr>
+    <tr>
+     <td style="font-weight: bold;text-align: left;vertical-align: top;width: 169px;height: 32px;border: 1px solid #CCCCCC;border-top: 1px solid #CCCCCC;border-bottom: 1px solid #CCCCCC;border-right: 1px solid #CCCCCC;border-left: 1px solid #CCCCCC;padding: 5px;">Auslöser</td>
+     <td style="text-align: left;vertical-align: top;width: 562px;height: 32px;border: 1px solid #CCCCCC;border-top: 1px solid #CCCCCC;border-bottom: 1px solid #CCCCCC;border-right: 1px solid #CCCCCC;border-left: 1px solid #CCCCCC;padding: 5px;">
+      <ul>
+       <li>Der Versicherte willigt in Push Notifications ein.
+        <br></li>
+       <li>Erneuerung des <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">pushkey</span>
+        <br></li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td style="font-weight: bold;text-align: left;vertical-align: top;width: 169px;height: 12px;border: 1px solid #CCCCCC;border-top: 1px solid #CCCCCC;border-bottom: 1px solid #CCCCCC;border-right: 1px solid #CCCCCC;border-left: 1px solid #CCCCCC;padding: 5px;">Akteur</td>
+     <td style="text-align: left;vertical-align: top;width: 562px;height: 12px;border: 1px solid #CCCCCC;border-top: 1px solid #CCCCCC;border-bottom: 1px solid #CCCCCC;border-right: 1px solid #CCCCCC;border-left: 1px solid #CCCCCC;padding: 5px;">Versicherter<span id="polarion-comment:102"></span></td>
+    </tr>
+    <tr>
+     <td style="font-weight: bold;text-align: left;vertical-align: top;width: 169px;height: 20px;border: 1px solid #CCCCCC;padding: 5px;">Vorbedingung</td>
+     <td style="text-align: left;vertical-align: top;width: 562px;height: 20px;border: 1px solid #CCCCCC;padding: 5px;">
+      <ul>
+       <li>Der Nutzer hat sich gegenüber&nbsp;dem Fachdienst authentisiert.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td style="font-weight: bold;text-align: left;vertical-align: top;width: 169px;height: 12px;border: 1px solid #CCCCCC;border-top: 1px solid #CCCCCC;border-bottom: 1px solid #CCCCCC;border-right: 1px solid #CCCCCC;border-left: 1px solid #CCCCCC;padding: 5px;">Nachbedingung</td>
+     <td style="text-align: left;vertical-align: top;width: 562px;height: 12px;border: 1px solid #CCCCCC;border-top: 1px solid #CCCCCC;border-bottom: 1px solid #CCCCCC;border-right: 1px solid #CCCCCC;border-left: 1px solid #CCCCCC;padding: 5px;">
+      <ul>
+       <li>FdV-Instanz&nbsp;ist registriert am Fachdienst zum Empfang von Push Notifications.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td style="font-weight: bold;text-align: left;vertical-align: top;width: 169px;height: 12px;border: 1px solid #CCCCCC;border-top: 1px solid #CCCCCC;border-bottom: 1px solid #CCCCCC;border-right: 1px solid #CCCCCC;border-left: 1px solid #CCCCCC;padding: 5px;">Standardablauf</td>
+     <td style="text-align: left;vertical-align: top;width: 562px;height: 12px;border: 1px solid #CCCCCC;border-top: 1px solid #CCCCCC;border-bottom: 1px solid #CCCCCC;border-right: 1px solid #CCCCCC;border-left: 1px solid #CCCCCC;padding: 5px;">wenn der Fachdienst verschlüsselte Push Notifications versendet:
+      <br>
+      <ol>
+       <li><span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">pushkey</span>&nbsp;ermitteln</li>
+       <li>initial shared secret <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">(iss)</span>erzeugen<span id="polarion-comment:64"></span></li>
+       <li>Aufruf zum Registrieren</li>
+       <li>Initiale Schlüsselableitung</li>
+       <li>Schlüssel speichern</li>
+       <li>initial shared secret <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">(iss)</span> löschen</li>
+      </ol>
+      wenn der Fachdienst keine verschlüsselte Push Notifications versendet:
+      <ol>
+       <li><span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">pushkey</span>&nbsp;von Push Provider ermitteln</li>
+       <li>Aufruf zum Registrieren</li>
+      </ol></td>
+    </tr>
+   </tbody>
+  </table>
+  <p class="polarion-rte-caption-paragraph"></p>
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>funkt. Eignung: Test Produkt/FA</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>FdV_Option_PushNotification</configElement>
+    </configElements>
+    <chapterNumber>5.3.2</chapterNumber>
+    <chapterName>FdV-Instanz Registrieren</chapterName>
+  </requirement>
+  <requirement id="A_27173" type="leafRequirement" severity="MUSS" lastUpdate="2025-05-28" technicalID="ML-165983" revision="1552241">
+    <title><![CDATA[FdV: Push Notifications - Instanz registrieren - pushkey ermitteln]]></title>
+    <description><![CDATA[Das FdV MUSS im Anwendungsfall "FdV-Instanz registrieren" einen pushkey vom plattformspezifischen Push Provider nach dessen Vorgaben beziehen und speichern.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Das FdV MUSS im Anwendungsfall "FdV-Instanz registrieren" einen <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">pushkey</span>&nbsp;vom plattformspezifischen Push Provider nach dessen Vorgaben beziehen und speichern.
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>funkt. Eignung: Herstellererklärung</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>FdV_Option_PushNotification</configElement>
+    </configElements>
+    <chapterNumber>5.3.2</chapterNumber>
+    <chapterName>FdV-Instanz Registrieren</chapterName>
+  </requirement>
+  <requirement id="A_27174" type="leafRequirement" severity="MUSS" lastUpdate="2025-05-28" technicalID="ML-165982" revision="1552241">
+    <title><![CDATA[FdV: Push Notifications - Instanz registrieren - initial shared secret (iss) erzeugen]]></title>
+    <description><![CDATA[Das FdV MUSS, wenn der Fachdienst verschlüsselte Push Notifications versendet, im Anwendungsfall "FdV-Instanz registrieren" einen HEX-String (32 Byte (256 Bit), 64 Zeichen Hexadecimal) als initial shared secret (iss) mit einer Entropie von mindestens 120 Bit erzeugen und den aktuellen Zeitpunkt im Format "yyyy-MM" als time_iss_created bestimmen.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Das FdV MUSS, wenn der Fachdienst verschlüsselte Push Notifications versendet, im Anwendungsfall "FdV-Instanz registrieren" einen HEX-String (32 Byte&nbsp;(256 Bit), 64 Zeichen Hexadecimal) als&nbsp;initial shared secret (<span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">iss</span>) mit einer Entropie von mindestens 120 Bit&nbsp;erzeugen&nbsp;und den aktuellen Zeitpunkt im Format <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">"yyyy-MM"</span> als <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">time_iss_created</span> bestimmen.
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>Sich.techn. Eignung: Produktgutachten</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>FdV_Option_PushNotification</configElement>
+    </configElements>
+    <chapterNumber>5.3.2</chapterNumber>
+    <chapterName>FdV-Instanz Registrieren</chapterName>
+  </requirement>
+  <requirement id="A_27175" type="leafRequirement" severity="MUSS" lastUpdate="2025-05-28" technicalID="ML-165981" revision="1552241">
+    <title><![CDATA[FdV: Push Notifications - Instanz registrieren - Aufruf]]></title>
+    <description><![CDATA[Das FdV MUSS im Anwendungsfall "FdV-Instanz registrieren" die HTTP-Operation POST /pushers/set des Fachdienstes ausführen.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Das FdV MUSS im Anwendungsfall "FdV-Instanz registrieren" die HTTP-Operation POST <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">/pushers/set</span> des Fachdienstes ausführen.
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>funkt. Eignung: Test Produkt/FA</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>FdV_Option_PushNotification</configElement>
+    </configElements>
+    <chapterNumber>5.3.2</chapterNumber>
+    <chapterName>FdV-Instanz Registrieren</chapterName>
+  </requirement>
+  <requirement id="A_27396" type="leafRequirement" severity="MUSS" lastUpdate="2025-05-28" technicalID="ML-167264" revision="1552241">
+    <title><![CDATA[FdV: Push Notifications - Instanz registrieren - Keine personenbezogenen Daten bei der Registrierung nutzen]]></title>
+    <description><![CDATA[Das FdV MUSS im Anwendungsfall "FdV-Instanz registrieren" sicherstellen, dass bei der Geräteregistrierung in den technisch erhobenen und übermittelten Registrierungsdaten keine personenbezogenen oder sicherheitskritischen Daten enthalten sind, insbesondere nicht die KVNR. Dies bezieht sich ausschließlich auf die vom System automatisch erfassten und verarbeiteten Daten.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Das FdV MUSS im Anwendungsfall "FdV-Instanz registrieren" sicherstellen, dass bei der Geräteregistrierung in den technisch erhobenen und übermittelten Registrierungsdaten keine personenbezogenen oder sicherheitskritischen Daten enthalten sind, insbesondere nicht die KVNR. Dies bezieht sich ausschließlich auf die vom System automatisch erfassten und verarbeiteten Daten.<span style="font-style: italic;color: #3366FF;"><span id="polarion-comment:121"></span>
+   <br> </span>
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>Sich.techn. Eignung: Produktgutachten</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>FdV_Option_PushNotification</configElement>
+    </configElements>
+    <chapterNumber>5.3.2</chapterNumber>
+    <chapterName>FdV-Instanz Registrieren</chapterName>
+  </requirement>
+  <requirement id="A_27176" type="leafRequirement" severity="MUSS" lastUpdate="2025-05-28" technicalID="ML-165980" revision="1552241">
+    <title><![CDATA[FdV: Push Notifications - Instanz registrieren - Initiale Schlüsselableitung shared-secret-Jahr-Monat und AES/GCM-Schlüssel-Jahr-Monat]]></title>
+    <description><![CDATA[Das FdV MUSS für den Anwendungsfall "FdV-Instanz registrieren", WENN der Fachdienst verschlüsselte Push Notifications versendet, nach erfolgreichen Response des Fachdienstes für das Jahr und den Monat gemäß time_iss_created eine Schlüsselableitung durchführen.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Das FdV MUSS für den Anwendungsfall "FdV-Instanz registrieren", WENN der Fachdienst verschlüsselte Push Notifications versendet, nach erfolgreichen Response des Fachdienstes für das Jahr und den Monat gemäß <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">time_iss_created</span> eine Schlüsselableitung durchführen.
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>Sich.techn. Eignung: Produktgutachten</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>FdV_Option_PushNotification</configElement>
+    </configElements>
+    <chapterNumber>5.3.2</chapterNumber>
+    <chapterName>FdV-Instanz Registrieren</chapterName>
+  </requirement>
+  <requirement id="A_27177" type="leafRequirement" severity="MUSS" lastUpdate="2025-05-28" technicalID="ML-165979" revision="1552241">
+    <title><![CDATA[FdV: Push Notifications - Instanz registrieren - Speichern des kryptographischen Materials]]></title>
+    <description><![CDATA[Das FdV MUSS das neue Geheimnis (shared-secret-Jahr-Monat) und den neuen Schlüssel (AES/GCM-Schlüssel-Jahr-Monat) speichern, um diese für die Entschlüsselung von Push Notifications und eine erneute Ableitung nutzen zu können.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Das FdV MUSS das neue Geheimnis (<span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">shared-secret-Jahr-Monat</span>) und den neuen Schlüssel (<span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">AES/GCM-Schlüssel-Jahr-Monat</span>)&nbsp;speichern, um diese für die Entschlüsselung von Push Notifications<span id="polarion-comment:82"></span> und eine erneute Ableitung nutzen zu können.
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>funkt. Eignung: Herstellererklärung</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>FdV_Option_PushNotification</configElement>
+    </configElements>
+    <chapterNumber>5.3.2</chapterNumber>
+    <chapterName>FdV-Instanz Registrieren</chapterName>
+  </requirement>
+  <requirement id="A_27375" type="leafRequirement" severity="MUSS" lastUpdate="2025-05-28" technicalID="ML-167205" revision="1552241">
+    <title><![CDATA[FdV: Push Notifications - Instanz registrieren - initial shared secret (iss) löschen]]></title>
+    <description><![CDATA[Das FdV MUSS für den Anwendungsfall "FdV-Instanz registrieren" nach erfolgreicher initialer Schlüsselableitung das initial shared secret (iss) löschen.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Das FdV MUSS für den Anwendungsfall "FdV-Instanz registrieren" nach erfolgreicher initialer Schlüsselableitung das initial shared secret (<span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">iss</span>) löschen.<span id="polarion-comment:117"></span>
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>Sich.techn. Eignung: Produktgutachten</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>FdV_Option_PushNotification</configElement>
+    </configElements>
+    <chapterNumber>5.3.2</chapterNumber>
+    <chapterName>FdV-Instanz Registrieren</chapterName>
+  </requirement>
+  <requirement id="A_27664" type="leafRequirement" severity="MUSS" lastUpdate="2025-05-28" technicalID="ML-171055" revision="1552241">
+    <title><![CDATA[FdV: Push Notifications - Instanz registrieren - Registrierte Instanzen anzeigen]]></title>
+    <description><![CDATA[Das FdV MUSS es dem Nutzer ermöglichen, die registrierten Pusher anzuzeigen.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>Das FdV MUSS es dem Nutzer ermöglichen, die registrierten Pusher anzuzeigen.</body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>Sich.techn. Eignung: Produktgutachten</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>FdV_Option_PushNotification</configElement>
+    </configElements>
+    <chapterNumber>5.3.2</chapterNumber>
+    <chapterName>FdV-Instanz Registrieren</chapterName>
+  </requirement>
+  <requirement id="A_27665" type="leafRequirement" severity="MUSS" lastUpdate="2025-05-28" technicalID="ML-171054" revision="1552241">
+    <title><![CDATA[FdV: Push Notifications - Instanz löschen]]></title>
+    <description><![CDATA[Das FdV MUSS es dem Nutzer ermöglichen, registrierte Pusher zu löschen.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>Das FdV MUSS es dem Nutzer ermöglichen, registrierte Pusher zu löschen.</body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>Sich.techn. Eignung: Produktgutachten</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>FdV_Option_PushNotification</configElement>
+    </configElements>
+    <chapterNumber>5.3.2</chapterNumber>
+    <chapterName>FdV-Instanz Registrieren</chapterName>
+  </requirement>
+  <requirement id="A_27178" type="leafRequirement" severity="MUSS" lastUpdate="2025-05-28" technicalID="ML-165991" revision="1552241">
+    <title><![CDATA[FdV: Push Notifications empfangen]]></title>
+    <description><![CDATA[Das FdV MUSS den Anwendungsfall "Push Notifications empfangen" gemäß [gemF_PushNotification#TAB_FdV_Empfangen] umsetzen. 
+  
+  
+  
+  Tabelle #: TAB_FdV_Empfangen Push Notifications empfangen
+  
+   
+    
+     Name
+     Push Notifications empfangen
+    
+    
+     Auslöser
+     
+      
+       Das FdV erhält eine Push Notification vom Push Provider
+        
+
+      
+     
+    
+    
+     Akteur
+     
+      
+
+     
+    
+    
+     Vorbedingung
+     
+      
+       Der Nutzer hat in den Empfang von Push Notification eingewilligt
+       Das Push Gateway hat eine Push Notification für die FdV-Instanz gesendet
+        
+
+      
+     
+    
+    
+     Nachbedingung
+     
+      
+       Falls verschlüsselte Pushes versendet werden:
+       
+        Im FdV ist aktuelles Schlüsselmaterial gespeichert.
+         
+
+       
+       Das FdV zeigt dem Nutzer eine Nachricht an.
+        
+
+      
+     
+    
+    
+     Standardablauf
+     
+      
+       Falls verschlüsselte Pushes versendet werden:
+       
+        Falls kein aktueller Schlüssel vorliegt: Schlüsselableitung
+         
+
+        Push Notification Nutzdaten entschlüsseln
+         
+
+       
+       Titel/Text für Push Notification erzeugen (ggf.  weitere/andere Inhalte)
+        
+
+       Nachricht anzeigen]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Das FdV MUSS den Anwendungsfall "Push Notifications empfangen" gemäß [gemF_PushNotification#TAB_FdV_Empfangen] umsetzen.&nbsp;
+  <p class="polarion-rte-caption-paragraph"></p>
+  <p data-keep-next="true" class="polarion-rte-caption-paragraph" style="text-align: left;"></p>
+  <p data-keep-next="true" class="polarion-rte-caption-paragraph" style="text-align: left;"></p>
+  <p data-keep-next="true" class="polarion-rte-caption-paragraph" style="text-align: left;">Tabelle <span data-sequence="Tabelle" class="polarion-rte-caption">#</span>: TAB_FdV_Empfangen Push Notifications empfangen</p>
+  <table id="polarion_wiki macro name=table;params=bold=1" class="polarion-Document-table" style="width: 100%;max-width: 1280px;margin-left: 0px;margin-right: auto;border: 1px solid #CCCCCC;empty-cells: show;border-collapse: collapse;max-width: 1280.0px;">
+   <tbody>
+    <tr>
+     <th style="font-weight: bold;background-color: #F0F0F0;text-align: left;vertical-align: top;width: 93.2188px;height: 19px;border: 1px solid #CCCCCC;border-top: 1px solid #CCCCCC;border-bottom: 1px solid #CCCCCC;border-right: 1px solid #CCCCCC;border-left: 1px solid #CCCCCC;padding: 5px;">Name</th>
+     <th style="font-weight: bold;background-color: #F0F0F0;text-align: left;vertical-align: top;width: 523.797px;height: 19px;border: 1px solid #CCCCCC;border-top: 1px solid #CCCCCC;border-bottom: 1px solid #CCCCCC;border-right: 1px solid #CCCCCC;border-left: 1px solid #CCCCCC;padding: 5px;">Push Notifications empfangen</th>
+    </tr>
+    <tr>
+     <td style="font-weight: bold;text-align: left;vertical-align: top;width: 93.2188px;height: 46.7969px;border: 1px solid #CCCCCC;border-top: 1px solid #CCCCCC;border-bottom: 1px solid #CCCCCC;border-right: 1px solid #CCCCCC;border-left: 1px solid #CCCCCC;padding: 5px;">Auslöser</td>
+     <td style="text-align: left;vertical-align: top;width: 523.797px;height: 46.7969px;border: 1px solid #CCCCCC;border-top: 1px solid #CCCCCC;border-bottom: 1px solid #CCCCCC;border-right: 1px solid #CCCCCC;border-left: 1px solid #CCCCCC;padding: 5px;">
+      <ul>
+       <li>Das FdV erhält eine Push Notification vom Push Provider
+        <br></li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td style="font-weight: bold;text-align: left;vertical-align: top;width: 93.2188px;height: 19px;border: 1px solid #CCCCCC;border-top: 1px solid #CCCCCC;border-bottom: 1px solid #CCCCCC;border-right: 1px solid #CCCCCC;border-left: 1px solid #CCCCCC;padding: 5px;">Akteur</td>
+     <td style="text-align: left;vertical-align: top;width: 523.797px;height: 19px;border: 1px solid #CCCCCC;border-top: 1px solid #CCCCCC;border-bottom: 1px solid #CCCCCC;border-right: 1px solid #CCCCCC;border-left: 1px solid #CCCCCC;padding: 5px;">
+      <br>
+     </td>
+    </tr>
+    <tr>
+     <td style="font-weight: bold;text-align: left;vertical-align: top;width: 93.2188px;height: 67.5938px;border: 1px solid #CCCCCC;border-top: 1px solid #CCCCCC;border-bottom: 1px solid #CCCCCC;border-right: 1px solid #CCCCCC;border-left: 1px solid #CCCCCC;padding: 5px;">Vorbedingung</td>
+     <td style="text-align: left;vertical-align: top;width: 523.797px;height: 67.5938px;border: 1px solid #CCCCCC;border-top: 1px solid #CCCCCC;border-bottom: 1px solid #CCCCCC;border-right: 1px solid #CCCCCC;border-left: 1px solid #CCCCCC;padding: 5px;">
+      <ul>
+       <li>Der Nutzer hat in den Empfang von Push Notification eingewilligt</li>
+       <li>Das Push Gateway hat eine Push Notification für die FdV-Instanz gesendet
+        <br></li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td style="font-weight: bold;text-align: left;vertical-align: top;width: 93.2188px;height: 67.5938px;border: 1px solid #CCCCCC;border-top: 1px solid #CCCCCC;border-bottom: 1px solid #CCCCCC;border-right: 1px solid #CCCCCC;border-left: 1px solid #CCCCCC;padding: 5px;">Nachbedingung</td>
+     <td style="text-align: left;vertical-align: top;width: 523.797px;height: 67.5938px;border: 1px solid #CCCCCC;border-top: 1px solid #CCCCCC;border-bottom: 1px solid #CCCCCC;border-right: 1px solid #CCCCCC;border-left: 1px solid #CCCCCC;padding: 5px;">
+      <ul>
+       <li>Falls verschlüsselte Pushes versendet werden:</li>
+       <ul>
+        <li>Im FdV ist aktuelles Schlüsselmaterial gespeichert.
+         <br></li>
+       </ul>
+       <li>Das FdV zeigt dem Nutzer eine Nachricht an.
+        <br></li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td style="font-weight: bold;text-align: left;vertical-align: top;width: 93.2188px;height: 109.188px;border: 1px solid #CCCCCC;border-top: 1px solid #CCCCCC;border-bottom: 1px solid #CCCCCC;border-right: 1px solid #CCCCCC;border-left: 1px solid #CCCCCC;padding: 5px;">Standardablauf</td>
+     <td style="text-align: left;vertical-align: top;width: 523.797px;height: 109.188px;border: 1px solid #CCCCCC;border-top: 1px solid #CCCCCC;border-bottom: 1px solid #CCCCCC;border-right: 1px solid #CCCCCC;border-left: 1px solid #CCCCCC;padding: 5px;">
+      <ol>
+       <li>Falls verschlüsselte Pushes versendet werden:</li>
+       <ol>
+        <li>Falls kein aktueller Schlüssel vorliegt: Schlüsselableitung
+         <br></li>
+        <li>Push Notification Nutzdaten entschlüsseln<span id="polarion-comment:83"></span>
+         <br></li>
+       </ol>
+       <li>Titel/Text für Push Notification erzeugen (ggf. &nbsp;weitere/andere Inhalte)<span id="polarion-comment:104"></span>
+        <br></li>
+       <li>Nachricht anzeigen
+        <br></li>
+      </ol>
+     </td>
+    </tr>
+   </tbody>
+  </table>
+  <br>
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>funkt. Eignung: Test Produkt/FA</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>FdV_Option_PushNotification</configElement>
+    </configElements>
+    <chapterNumber>5.3.2.1</chapterNumber>
+    <chapterName>Push Notifications empfangen</chapterName>
+  </requirement>
+  <requirement id="A_27179" type="leafRequirement" severity="MUSS" lastUpdate="2025-05-28" technicalID="ML-165995" revision="1552241">
+    <title><![CDATA[FdV: Push Notifications empfangen - Schlüsselableitung]]></title>
+    <description><![CDATA[Das FdV MUSS für den Anwendungsfall "Push Notifications empfangen", falls verschlüsselte Pushes versendet werden, nach Erhalt einer Push Notification time_message_encrypted extrahieren und prüfen, ob hierfür passendes Schlüsselmaterial (AES/GCM-Schlüssel-Jahr-Monat) im FdV vorliegt.
+  
+
+  Das FdV MUSS, falls kein zu time_message_encrypted passendes Schlüsselmaterial vorliegt und time_message_encrypted nach dem aktuellsten vorliegenden Geheimnis (shared-secret-Jahr-Monat) liegt, schrittweise neues Schlüsselmaterial basierend auf dem aktuellsten vorliegenden Geheimnis ableiten, bis die Schlüssel passend zu time_message_encrypted vorliegen.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Das FdV MUSS für den Anwendungsfall "Push Notifications empfangen"<span style="font-size: 10pt;line-height: 1.5;">, falls verschlüsselte Pushes versendet werden,</span> nach Erhalt einer Push Notification time_message_encrypted extrahieren und prüfen, ob hierfür passendes Schlüsselmaterial (<span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">AES/GCM-Schlüssel-Jahr-Monat</span>) im FdV vorliegt.
+  <br>
+  Das FdV MUSS, falls kein zu time_message_encrypted passendes Schlüsselmaterial vorliegt und time_message_encrypted nach dem aktuellsten vorliegenden Geheimnis (<span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">shared-secret-Jahr-Monat</span>) liegt, schrittweise neues Schlüsselmaterial basierend auf dem aktuellsten vorliegenden Geheimnis ableiten, bis die Schlüssel passend zu time_message_encrypted vorliegen.
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>Sich.techn. Eignung: Produktgutachten</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>FdV_Option_PushNotification</configElement>
+    </configElements>
+    <chapterNumber>5.3.2.1</chapterNumber>
+    <chapterName>Push Notifications empfangen</chapterName>
+  </requirement>
+  <requirement id="A_27180" type="leafRequirement" severity="MUSS" lastUpdate="2025-05-28" technicalID="ML-165993" revision="1552241">
+    <title><![CDATA[FdV: Push Notifications empfangen - Löschen alter Schlüssel]]></title>
+    <description><![CDATA[Das FdV MUSS, falls verschlüsselte Pushes versendet werden, nach jeder Schlüsselableitung alle Geheimnisse (shared-secret-Jahr-Monat) und Schlüssel (AES/GCM-Schlüssel-Jahr-Monat) für Push Notifications löschen, die älter als zwei Monate im Vergleich zum abgeleiteten Jahr-Monat sind.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Das FdV MUSS<span style="font-size: 10pt;line-height: 1.5;">,&nbsp;falls verschlüsselte Pushes versendet werden,</span> nach jeder Schlüsselableitung alle<span id="polarion-comment:118"></span> Geheimnisse (shared-secret-Jahr-Monat) und Schlüssel (<span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">AES/GCM-Schlüssel-Jahr-Monat</span>) für Push Notifications löschen, die älter als zwei Monate im&nbsp;Vergleich&nbsp;zum&nbsp;abgeleiteten Jahr-Monat sind.
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>Sich.techn. Eignung: Produktgutachten</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>FdV_Option_PushNotification</configElement>
+    </configElements>
+    <chapterNumber>5.3.2.1</chapterNumber>
+    <chapterName>Push Notifications empfangen</chapterName>
+  </requirement>
+  <requirement id="A_27181" type="leafRequirement" severity="MUSS" lastUpdate="2025-05-28" technicalID="ML-165994" revision="1552241">
+    <title><![CDATA[FdV: Push Notifications empfangen - Benachrichtigungsinhalt entschlüsseln]]></title>
+    <description><![CDATA[Das FdV MUSS, falls verschlüsselte Pushes versendet werden, für den Anwendungsfall "Push Notifications empfangen" den Push Notification Nutzdaten mit dem Schlüssel (AES/GCM-Schlüssel-Jahr-Monat) passend zu time_message_encrypted nach AES/GCM entschlüsseln.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Das<span id="polarion-comment:42"></span> FdV MUSS,&nbsp;<span style="font-size: 10pt;line-height: 1.5;">falls verschlüsselte Pushes versendet werden,</span> für den Anwendungsfall "Push Notifications empfangen" den Push Notification Nutzdaten<span id="polarion-comment:84"></span> mit dem Schlüssel (<span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">AES/GCM-Schlüssel-Jahr-Monat</span>) passend zu <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">time_message_encrypted</span> nach AES/GCM entschlüsseln.
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>Sich.techn. Eignung: Produktgutachten</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>FdV_Option_PushNotification</configElement>
+    </configElements>
+    <chapterNumber>5.3.2.1</chapterNumber>
+    <chapterName>Push Notifications empfangen</chapterName>
+  </requirement>
+  <requirement id="A_27612" type="leafRequirement" severity="MUSS" lastUpdate="2025-05-28" technicalID="ML-170373" revision="1552241">
+    <title><![CDATA[FdV: Push Notifications empfangen - Aktive Bestätigung bei Verlassen des FdVs]]></title>
+    <description><![CDATA[Falls Pushnachrichten Links enthalten, die dazu führen, dass das FdV verlassen wird, MUSS das FdV den Nutzer über Risiken informieren und eine aktive Bestätigung einfordern.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>Falls Pushnachrichten Links enthalten, die dazu führen, dass das FdV verlassen wird, MUSS&nbsp;das FdV den Nutzer über Risiken informieren und eine aktive Bestätigung einfordern.</body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>Sich.techn. Eignung: Produktgutachten</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>FdV_Option_PushNotification</configElement>
+    </configElements>
+    <chapterNumber>5.3.2.1</chapterNumber>
+    <chapterName>Push Notifications empfangen</chapterName>
+  </requirement>
+  <requirement id="A_27182" type="leafRequirement" severity="MUSS" lastUpdate="2025-05-28" technicalID="ML-165998" revision="1552241">
+    <title><![CDATA[FdV: Push Notifications - Default deaktiviert]]></title>
+    <description><![CDATA[Das FdV MUSS sicherstellen, dass der Erhalt von Push Notifications in der Default-Einstellung nach Installation deaktiviert ist.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>Das FdV MUSS sicherstellen, dass der Erhalt von Push Notifications in der Default-Einstellung nach Installation deaktiviert ist.</body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>funkt. Eignung: Herstellererklärung</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>FdV_Option_PushNotification</configElement>
+    </configElements>
+    <chapterNumber>5.3.2.2</chapterNumber>
+    <chapterName>Notifications aktivieren und deaktivieren</chapterName>
+  </requirement>
+  <requirement id="A_27183" type="leafRequirement" severity="MUSS" lastUpdate="2025-05-28" technicalID="ML-165999" revision="1552241">
+    <title><![CDATA[FdV: Push Notifications - Option aktivieren]]></title>
+    <description><![CDATA[Das FdV MUSS dem Nutzer die Möglichkeit bieten das Erhalten von Push Notifications zu aktivieren.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Das<span id="polarion-comment:105"></span> FdV MUSS dem Nutzer die Möglichkeit bieten das Erhalten von Push Notifications zu aktivieren.
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>funkt. Eignung: Test Produkt/FA</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>FdV_Option_PushNotification</configElement>
+    </configElements>
+    <chapterNumber>5.3.2.2</chapterNumber>
+    <chapterName>Notifications aktivieren und deaktivieren</chapterName>
+  </requirement>
+  <requirement id="A_27184" type="leafRequirement" severity="MUSS" lastUpdate="2025-05-28" technicalID="ML-165996" revision="1552241">
+    <title><![CDATA[FdV: Push Notifications - Option deaktivieren]]></title>
+    <description><![CDATA[Das FdV MUSS dem Nutzer die Möglichkeit bieten das Erhalten von Push Notifications spezifisch oder allgemein zu deaktivieren und somit die Einwilligung zum Erhalt von Push Notifications spezifisch oder allgemein zu widerrufen.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>Das FdV MUSS dem Nutzer die Möglichkeit bieten das Erhalten von Push Notifications spezifisch oder allgemein zu deaktivieren und somit die Einwilligung zum Erhalt von Push Notifications spezifisch oder allgemein zu widerrufen.</body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>funkt. Eignung: Test Produkt/FA</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>FdV_Option_PushNotification</configElement>
+    </configElements>
+    <chapterNumber>5.3.2.2</chapterNumber>
+    <chapterName>Notifications aktivieren und deaktivieren</chapterName>
+  </requirement>
+  <requirement id="A_27185-01" type="leafRequirement" severity="MUSS" lastUpdate="2025-09-12" technicalID="ML-177719" revision="1552241">
+    <title><![CDATA[FdV: Datenschutzinformationen zu Push Notifications]]></title>
+    <description><![CDATA[Das FdV MUSS den Nutzer des FdV (z. B. in der Datenschutzerklärung) über folgende Punkte informieren:
+  
+   
+    die Art der Datenübermittlung und die verbleibenden Risiken,
+    welche Metainformation verarbeitet bzw. übertragen werden,
+    über welchen plattformspezifischen Push Provider die Push Notifications gesendet werden,
+    ob für den genutzten plattformspezifischen Push Provider ein der Europäischen Union der Sache nach gleichwertiges Datenschutzniveau besteht und falls dies nicht der Fall ist, 
+      
+ 
+     
+    
+     typische Risiken (z.B. erschwerte Durchsetzung von Betroffenenrechten, fehlende Kontrolle der Weiterverarbeitung und Übermittlung der Daten, fehlende Datenschutzaufsicht oder Zugriffe durch staatliche Stellen), und
+      
+
+     spezifische Risiken, die sich konkret mit den übermittelten Daten in dem Drittland realisieren könnten - sofern dem Hersteller Informationen dazu vorliegen]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Das FdV MUSS den Nutzer des FdV&nbsp;(z. B. in der Datenschutzerklärung) über folgende Punkte informieren:
+  <div style="margin-left: 2em;">
+   <ul>
+    <li>die Art der Datenübermittlung und die verbleibenden Risiken,</li>
+    <li>welche Metainformation verarbeitet bzw. übertragen werden,</li>
+    <li>über welchen plattformspezifischen Push Provider die Push Notifications gesendet werden,</li>
+    <li>ob für den genutzten plattformspezifischen Push Provider ein der Europäischen Union der Sache nach gleichwertiges Datenschutzniveau besteht und falls dies nicht der Fall ist, <span style="color: #3366FF;">
+      <br> 
+     </span></li>
+    <ul>
+     <li>typische Risiken (z.B. erschwerte Durchsetzung von Betroffenenrechten, fehlende Kontrolle der Weiterverarbeitung und Übermittlung der Daten, fehlende Datenschutzaufsicht oder Zugriffe durch staatliche Stellen), und
+      <br></li>
+     <li>spezifische Risiken, die sich konkret mit den übermittelten Daten in dem Drittland realisieren könnten - sofern dem Hersteller Informationen dazu vorliegen</li>
+    </ul>
+   </ul>
+  </div>
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>Sich.techn. Eignung: Produktgutachten</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>FdV_Option_PushNotification</configElement>
+    </configElements>
+    <chapterNumber>5.3.2.2</chapterNumber>
+    <chapterName>Notifications aktivieren und deaktivieren</chapterName>
+  </requirement>
+  <requirement id="A_27190" type="leafRequirement" severity="MUSS" lastUpdate="2025-09-10" technicalID="ML-166039" revision="1552241">
+    <title><![CDATA[Fachdienst - Push Notifications - Channels - OpenApi_Notification_Fachdienst]]></title>
+    <description><![CDATA[Der Fachdienst MUSS eine API mit den Endpunkten GET /channels, GET /channels/{pushkey} und POST /channels/{pushkey}  anbieten.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Der Fachdienst MUSS eine API mit den Endpunkten GET&nbsp;<span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">/channels, GET /channels/{pushkey} und POST /channels/{pushkey} </span> anbieten.
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>funkt. Eignung: Test Produkt/FA</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>Aktensystem_ePA</configElement>
+      <configElement>eRp_FD</configElement>
+    </configElements>
+    <chapterNumber>5.4.1.1</chapterNumber>
+    <chapterName>Fachdienst</chapterName>
+  </requirement>
+  <requirement id="A_27193-02" type="leafRequirement" severity="MUSS" lastUpdate="2025-11-18" technicalID="ML-182362" revision="1552241">
+    <title><![CDATA[Fachdienst - FdV-Instanz registrieren - Liste der channel_ids des Geräts anlegen]]></title>
+    <description><![CDATA[Der Fachdienst MUSS beim Aufruf der Operation POST /pushers/set prüfen, ob zu pushkey und app_id eine App-Registrierung existiert und bei negativem Ergebnis eine neue Liste der channel_ids, mit den Status not_set für jede channel_id, für diese App-Registrierung speichern.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Der Fachdienst MUSS beim Aufruf der Operation <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">POST /pushers/set</span> prüfen, ob zu <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">pushkey</span> und <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">app_id</span> eine App-Registrierung existiert und bei negativem Ergebnis&nbsp;eine neue Liste der <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">channel_ids</span>, mit den Status <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">not_set</span> für jede <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">channel_id</span>, für diese App-Registrierung speichern.
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>funkt. Eignung: Herstellererklärung</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>Aktensystem_ePA</configElement>
+      <configElement>eRp_FD</configElement>
+    </configElements>
+    <chapterName>Fachdienst - FdV-Instanz registrieren - Liste der event_ids des Geräts anlegen</chapterName>
+  </requirement>
+  <requirement id="A_27196-01" type="leafRequirement" severity="MUSS" lastUpdate="2025-11-11" technicalID="ML-182360" revision="1552241">
+    <title><![CDATA[Fachdienst - Push Notification senden - Status der channel_id prüfen]]></title>
+    <description><![CDATA[Der Fachdienst MUSS beim Auftreten eines Triggers für Push Notifications folgende Schritte durchführen:
+  
+   Prüfen, ob für den Versicherten eine App-Registrierung existiert.
+   Bei positivem Ergebnis: Für jede App-Registrierung prüfen, ob der Status der getriggerten channel_id gleich "Enabled" ist.
+   Bei negativem Ergebnis: Die Operation für die geprüfte App-Registrierung ohne weitere Aktivität beenden]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Der Fachdienst MUSS beim Auftreten eines Triggers für Push Notifications folgende Schritte durchführen:
+  <ol>
+   <li>Prüfen, ob für den Versicherten eine App-Registrierung existiert.</li>
+   <li>Bei positivem Ergebnis: Für jede App-Registrierung prüfen, ob der Status der getriggerten channel_id gleich "Enabled" ist.</li>
+   <li>Bei negativem Ergebnis: Die Operation für die geprüfte App-Registrierung ohne weitere Aktivität beenden</li>
+  </ol>
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>funkt. Eignung: Herstellererklärung</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>Aktensystem_ePA</configElement>
+      <configElement>eRp_FD</configElement>
+    </configElements>
+    <chapterName>Fachdienst - Push Notification senden - Status der event_id prüfen</chapterName>
+  </requirement>
+  <requirement id="A_27197-01" type="leafRequirement" severity="MUSS" lastUpdate="2025-11-11" technicalID="ML-182361" revision="1552241">
+    <title><![CDATA[Fachdienst - FdV-Instanz deregistrieren - Liste der channel_ids des Geräts löschen]]></title>
+    <description><![CDATA[Der Fachdienst MUSS beim Aufruf der Operation POST /pushers/set prüfen, ob zu pushkey und app_id eine App-Registrierung existiert und bei positivem Ergebnis, wenn kind null ist, die Liste der Status der channel_ids löschen. ]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Der Fachdienst MUSS beim Aufruf der Operation <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">POST /pushers/set</span> prüfen, ob zu <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">pushkey</span> und <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">app_id</span> eine App-Registrierung existiert und bei positivem Ergebnis, wenn <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">kind null</span> ist,&nbsp;die Liste der Status der <span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">channel_ids</span> löschen.&nbsp;
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>funkt. Eignung: Herstellererklärung</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>Aktensystem_ePA</configElement>
+      <configElement>eRp_FD</configElement>
+    </configElements>
+    <chapterName>Fachdienst - FdV-Instanz deregistrieren - Liste der event_ids des Geräts löschen</chapterName>
+  </requirement>
+  <requirement id="A_28210" type="leafRequirement" severity="MUSS" lastUpdate="2025-09-11" technicalID="ML-179164" revision="1552241">
+    <title><![CDATA[FdV Push Notifications - Channelkonfiguration anlegen]]></title>
+    <description><![CDATA[Das FdV MUSS zur Konfiguration der Channels/Trigger die Operation POST /channels/{pushkey} am Fachdienst aufrufen.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Das FdV MUSS&nbsp;zur Konfiguration der Channels/Trigger die Operation&nbsp;<span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">POST /channels/{pushkey}</span> am Fachdienst aufrufen.
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>funkt. Eignung: Test Produkt/FA</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>FdV_Option_PushNotification</configElement>
+    </configElements>
+    <chapterNumber>5.4.1.2</chapterNumber>
+    <chapterName>FdV</chapterName>
+  </requirement>
+  <requirement id="A_27666" type="leafRequirement" severity="MUSS" lastUpdate="2025-05-28" technicalID="ML-171061" revision="1552241">
+    <title><![CDATA[FdV Push Notifications - Channelkonfiguration verwalten]]></title>
+    <description><![CDATA[Das FdV MUSS es dem Nutzer ermöglichen, die Channelkonfiguration zu verwalten.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>Das FdV MUSS es dem Nutzer ermöglichen, die Channelkonfiguration zu verwalten.</body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>funkt. Eignung: Test Produkt/FA</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>FdV_Option_PushNotification</configElement>
+    </configElements>
+    <chapterNumber>5.4.1.2</chapterNumber>
+    <chapterName>FdV</chapterName>
+  </requirement>
+  <requirement id="A_27531" type="leafRequirement" severity="MUSS" lastUpdate="2025-08-27" technicalID="ML-169239" revision="1552241">
+    <title><![CDATA[Fachdienst - Push Notifications - OpenApi_Notification_Fachdienst_History]]></title>
+    <description><![CDATA[Der Fachdienst MUSS eine API mit den Endpunkten GET /history/{notification_id} und GET /history/device/{pushkey} anbieten.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Der Fachdienst MUSS eine API mit den Endpunkten GET&nbsp;<span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">/history/{notification_id} und GET /history/device/{pushkey}&nbsp;</span>anbieten.
+  <br>
+ </body>
+</html>]]></description_html>
+    <chapterNumber>5.4.2.1</chapterNumber>
+    <chapterName>Fachdienst</chapterName>
+  </requirement>
+  <requirement id="A_27532" type="leafRequirement" severity="MUSS" lastUpdate="2025-08-27" technicalID="ML-169240" revision="1552241">
+    <title><![CDATA[Fachdienst - Push Notification senden - ReferenzID zur Historie mitschicken]]></title>
+    <description><![CDATA[Der Fachdienst MUSS beim Senden einer Push Notification eine zufällige und eindeutige ID als  notification.identifier senden und sie zusammen mit dem Inhalt der Push Notification speichern.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  Der Fachdienst MUSS beim Senden einer Push Notification eine zufällige und eindeutige ID als &nbsp;<span style="font-family: 'Courier New', Courier, monospace, HanWangKanTan;">notification.identifier</span>&nbsp;senden und sie zusammen mit dem Inhalt der Push Notification speichern.
+  <br>
+ </body>
+</html>]]></description_html>
+    <chapterNumber>5.4.2.1</chapterNumber>
+    <chapterName>Fachdienst</chapterName>
+  </requirement>
+  <requirement id="A_28267" type="leafRequirement" severity="MUSS" lastUpdate="2026-02-18" technicalID="ML-179427" revision="1552241">
+    <title><![CDATA[Push Notifications - mTLS Authentifizierung]]></title>
+    <description><![CDATA[Die Komponenten Push Gateway und Fachdienst MÜSSEN sich mittels mTLS beidseitig authentifizieren.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  <span style="font-size: 10pt;line-height: 1.5;">Die Komponenten Push Gateway und Fachdienst MÜSSEN sich mittels mTLS beidseitig authentifizieren.</span><span style="color: #3366FF;"> <span id="polarion-comment:10"></span></span>
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>Sich.techn. Eignung: Produktgutachten</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>Aktensystem_ePA</configElement>
+      <configElement>eRp_FD</configElement>
+      <configElement>FdV_Option_PushNotification</configElement>
+    </configElements>
+    <chapterNumber>5.5</chapterNumber>
+    <chapterName>Sicherheit</chapterName>
+  </requirement>
+  <requirement id="A_28268" type="leafRequirement" severity="MUSS" lastUpdate="2026-02-18" technicalID="ML-179428" revision="1552241">
+    <title><![CDATA[Push Notifications - mTLS Authentifizierungszertifikat]]></title>
+    <description><![CDATA[Die Komponenten Push Gateway und Fachdienst MÜSSEN sich beim TLS-Verbindungsaufbau gegenüber dem Client mit einem Extended Validation TLS-Zertifikat eines Herausgebers gemäß [CAB Forum] authentisieren.]]></description>
+    <description_html><![CDATA[<html>
+ <head></head>
+ <body>
+  <span style="font-size: 10pt;line-height: 1.5;">Die Komponenten Push Gateway und Fachdienst MÜSSEN sich beim TLS-Verbindungsaufbau gegenüber dem Client mit einem Extended Validation TLS-Zertifikat eines Herausgebers gemäß [CAB Forum]&nbsp;authentisieren.</span>
+ </body>
+</html>]]></description_html>
+    <testProcedures>
+      <testProcedure>Sich.techn. Eignung: Produktgutachten</testProcedure>
+    </testProcedures>
+    <configElements>
+      <configElement>Aktensystem_ePA</configElement>
+      <configElement>eRp_FD</configElement>
+      <configElement>FdV_Option_PushNotification</configElement>
+    </configElements>
+    <chapterNumber>5.5</chapterNumber>
+    <chapterName>Sicherheit</chapterName>
+  </requirement>
+</requirements>

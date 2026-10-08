@@ -2,6 +2,57 @@
 
 # Release Notes ZETA Testfachdienst
 
+## Version 1.3.0
+
+TestFachdienst 1.3.0
+
+#### Release Focus:
+
+- Added the `POST /test-support/notifications` API for triggering deterministic notification events.
+- Added stable `ProblemDetail` responses for rejected, unavailable, or invalid Notification Service responses.
+- Removed the `NOTIFICATION_SERVICE_TEST_SUPPORT_ENABLED` toggle; the notification test-support endpoint is available directly.
+- Refreshed the checked-in Swagger documentation for the notification test-event API and its error responses.
+- Refreshed the checked-in AsyncAPI snapshot version to `1.3.0`.
+
+### Known issues:
+
+- None documented for this release.
+
+#### Limitations
+
+- None documented for this release.
+
+## Version 1.2.0
+
+TestFachdienst 1.2.0
+
+#### Release Focus:
+
+- Added PushNotification Fachdienst setup endpoints for pushers and channel state handling.
+- Aligned channel routes with `OpenApi_Notification_Fachdienst_V1.1.0` by addressing device channel state by `pushkey`.
+- Added the official Fachdienst OpenAPI reference and refreshed checked-in Swagger documentation.
+- Documented the PushNotification AFO coverage and local API documentation refresh tasks.
+- Added Spring-aligned OpenTelemetry Logback export for structured application log records.
+- Forward self disclosure logs through OTLP with SLF4J key/value pairs captured as log attributes when telemetry is enabled.
+- Refreshed the checked-in AsyncAPI snapshot version to `1.2.0`.
+
+### Known issues:
+
+- None documented for this release.
+
+#### Limitations
+
+- PushNotification state is held in memory and is reset when the application restarts.
+- The standalone container image keeps the OpenTelemetry SDK disabled by default; deployments must enable OTLP export explicitly.
+
+## Version 1.0.0
+
+TestFachdienst 1.0.0
+
+#### Release Focus:
+
+- Harden STOMP/WebSocket logging
+
 ## Version 0.5.0
 
 TestFachdienst 0.5.0

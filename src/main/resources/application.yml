@@ -20,6 +20,15 @@ spring:
     cloud-platform: kubernetes
   lifecycle:
     timeout-per-shutdown-phase: 30s
+  http:
+    clients:
+      connect-timeout: ${NOTIFICATION_SERVICE_RS_CONNECT_TIMEOUT:2s}
+      read-timeout: ${NOTIFICATION_SERVICE_RS_READ_TIMEOUT:5s}
+
+notification-service:
+  rs:
+    base-url: ${NOTIFICATION_SERVICE_RS_BASE_URL:http://notification-service-rs:8080}
+    channel: ${NOTIFICATION_SERVICE_RS_CHANNEL:zeta}
 
 server:
   address: 0.0.0.0
@@ -42,6 +51,9 @@ server:
 #    client-auth: ${TLS_CLIENT_AUTH:need}
 
 management:
+  tracing:
+    sampling:
+      probability: ${MANAGEMENT_TRACING_SAMPLING_PROBABILITY:1.0}
   server:
     port: ${MANAGEMENT_SERVER_PORT:${SERVER_PORT:8080}}
   endpoints:
@@ -73,17 +85,8 @@ selfdisclosure:
     product_version: "@projectVersion@"
     producttype_version: 1.0.0
     configuration_version: "@projectVersion@"
-
-otlp:
   export:
-    logs:
-      intervalSeconds: ${OTLP_EXPORT_INTERVAL_SECONDS:30}
-      grpc:
-        enabled: ${OTLP_EXPORT_GRPC_ENABLED:false}
-        host: ${OTLP_EXPORT_GRPC_HOST:zeta-guard-telemetry-gateway:4317}
-      http:
-        enabled: ${OTLP_EXPORT_HTTP_ENABLED:false}
-        host: ${OTLP_EXPORT_HTTP_HOST:http://zeta-guard-telemetry-gateway:4318}
+    intervalSeconds: ${SELFDISCLOSURE_EXPORT_INTERVAL_SECONDS:30}
 
 jobrunr:
   database:

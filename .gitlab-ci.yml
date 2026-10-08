@@ -2,13 +2,14 @@ stages:
   - lint
   - license
   - test
+  - coverage
   - build
   - publish
 
 default:
-  image: gradle:jdk21-alpine
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/library/gradle:9.5.1-jdk21-alpine@sha256:c97002d23b2224f28b93739be5b8c1649f56ba834d7d0ea88e7fa68bf8b1aae2
   cache:
-    key: "${CI_PROJECT_PATH_SLUG}-${CI_COMMIT_REF_SLUG}-gradle-9.1.0"
+    key: "${CI_PROJECT_PATH_SLUG}-${CI_COMMIT_REF_SLUG}-gradle-9.5.1"
     paths:
       # Cache only stable downloaded artifacts. Gradle's generated Kotlin DSL and
       # configuration cache state is not safe to restore across CI jobs.
@@ -23,11 +24,23 @@ default:
 variables:
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"
   GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle"
-  CONTAINER_REGISTRY_URL: $CI_REGISTRY_IMAGE
-  TAG: "${CI_COMMIT_TAG:-$CI_COMMIT_SHORT_SHA}"
+  CONTAINER_REGISTRY_SERVER: "registry.tas-devtools-gitlab.spree.de:443"
+  CONTAINER_REGISTRY_USER: "achelos_to_tas_mirror_token"
+  CONTAINER_REGISTRY_URL: "registry.tas-devtools-gitlab.spree.de:443/zeta/testing/testfachdienst"
+
+.verification_rules:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
+    - if: '$CI_COMMIT_TAG'
+      when: on_success
+    - if: '$CI_COMMIT_BRANCH'
+      when: on_success
+    - when: never
 
 lint:
   stage: lint
+  extends: .verification_rules
   dependencies: []
   script:
     - ./gradlew --no-daemon --stacktrace spotlessCheck checkstyleMain checkstyleTest
@@ -40,6 +53,7 @@ lint:
 
 third-party-licenses:
   stage: license
+  extends: .verification_rules
   dependencies: []
   script:
     - ./gradlew --no-daemon --no-configuration-cache --stacktrace generateLicenseReport
@@ -51,6 +65,7 @@ third-party-licenses:
 
 test:
   stage: test
+  extends: .verification_rules
   needs: [ "lint", "third-party-licenses" ]
   dependencies: []
   script:
@@ -61,6 +76,37 @@ test:
       junit: build/test-results/test/*.xml
     paths:
       - build/reports/tests/
+      - build/jacoco/test.exec
+    expire_in: 1 week
+
+coverage:
+  stage: coverage
+  extends: .verification_rules
+  needs:
+    - job: test
+      artifacts: true
+  script:
+    - |
+      ./gradlew --no-daemon --stacktrace jacocoTestReport
+      LINE=$(grep -o 'counter type="LINE" missed="[0-9]*" covered="[0-9]*"' build/reports/jacoco/test/jacocoTestReport.xml | tail -n1)
+      if [ -z "$LINE" ]; then
+        echo "Could not parse line coverage from JaCoCo XML."
+        exit 1
+      fi
+      MISSED=$(echo "$LINE" | sed -E 's/.*missed="([0-9]+)".*/\1/')
+      COVERED=$(echo "$LINE" | sed -E 's/.*covered="([0-9]+)".*/\1/')
+      TOTAL=$((MISSED + COVERED))
+      PERCENT=$(awk "BEGIN { if ($TOTAL == 0) printf \"0.00\"; else printf \"%.2f\", (100 * $COVERED / $TOTAL) }")
+      echo "Line coverage: ${PERCENT}%"
+  coverage: '/Line coverage:\s+([0-9]+(?:\.[0-9]+)?)%/'
+  artifacts:
+    when: always
+    reports:
+      coverage_report:
+        coverage_format: jacoco
+        path: build/reports/jacoco/test/jacocoTestReport.xml
+    paths:
+      - build/reports/jacoco/test/
     expire_in: 1 week
 
 build-jar:
@@ -74,6 +120,8 @@ build-jar:
       - build/libs/*.jar
     expire_in: 1 week
   rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
     - if: '$CI_COMMIT_TAG'
       when: on_success
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
@@ -82,38 +130,69 @@ build-jar:
 
 publish-image:
   stage: publish
-  image: docker:27
+  interruptible: true
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/library/docker:29.4.3-cli@sha256:51e23845f5caff1e688a2fae003b0c69d635c9200ad544731db1593731df1d3a
   services:
-    - name: docker:27-dind
+    - name: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/library/docker:29.4.3-dind@sha256:685b91dca8eab7de1dce1c303dbb7a763e4082d6a60db10968adf3295fbd2495
+      alias: docker
       command: [ "--tls=false" ]
   variables:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
     TARGET_PLATFORMS: linux/amd64,linux/arm64
+    BINFMT_IMAGE: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/tonistiigi/binfmt:qemu-v10.2.1@sha256:8db0f28060565399642110b798c6c35efcac7c5b3b48c56d36503d3b4d8f93c8"
+    BUILDKIT_IMAGE: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/moby/buildkit:buildx-stable-1@sha256:e5d9d1763945ca186d48cbf5b0ff3e062eb917fb8a80da6da87144edb7320a90"
   needs: [ "build-jar" ]
   dependencies:
     - build-jar
   script:
-    - TAG="${CI_COMMIT_TAG:-${CI_COMMIT_SHORT_SHA:-${CI_COMMIT_REF_SLUG}}}"
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
     - |
-      docker run --privileged --rm tonistiigi/binfmt --install all
-      docker buildx create --name zeta-multiarch --driver docker-container --use || docker buildx use zeta-multiarch
+      if [ -n "${CI_MERGE_REQUEST_IID:-}" ]; then
+        TAG="test-${CI_MERGE_REQUEST_IID}"
+      else
+        TAG="${CI_COMMIT_TAG:-${CI_COMMIT_SHORT_SHA:-${CI_COMMIT_REF_SLUG}}}"
+      fi
+      export TAG
+    - |
+      # Push source-project MR images directly to TAS; use native credentials when this runs in the mirror.
+      if [ -n "${achelos_to_tas_mirror_token:-}" ]; then
+        echo "$achelos_to_tas_mirror_token" | docker login -u "$CONTAINER_REGISTRY_USER" --password-stdin "$CONTAINER_REGISTRY_SERVER"
+      elif [ "${CONTAINER_REGISTRY_SERVER}" = "${CI_REGISTRY:-}" ] && [ -n "${CI_REGISTRY_USER:-}" ] && [ -n "${CI_REGISTRY_PASSWORD:-}" ]; then
+        echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+      else
+        echo "CI variable achelos_to_tas_mirror_token or CI registry credentials are required to push ${CONTAINER_REGISTRY_URL}." >&2
+        exit 1
+      fi
+    - |
+      if [ -n "${CI_DEPENDENCY_PROXY_SERVER:-}" ] && [ -n "${CI_DEPENDENCY_PROXY_USER:-}" ] && [ -n "${CI_DEPENDENCY_PROXY_PASSWORD:-}" ]; then
+        echo "$CI_DEPENDENCY_PROXY_PASSWORD" | docker login -u "$CI_DEPENDENCY_PROXY_USER" --password-stdin "$CI_DEPENDENCY_PROXY_SERVER"
+      elif [ -n "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX:-}" ] && [ "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX%%/*}" = "${CI_REGISTRY:-}" ]; then
+        echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+        echo "Dependency proxy uses $CI_REGISTRY; existing Docker login applies."
+      else
+        echo "Dependency proxy credentials are not available for ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX%%/*}." >&2
+        exit 1
+      fi
+    - |
+      docker run --privileged --rm "${BINFMT_IMAGE}" --install all
+      docker buildx create --name zeta-multiarch --driver docker-container --driver-opt image="${BUILDKIT_IMAGE}" --use || docker buildx use zeta-multiarch
       docker buildx inspect --bootstrap
     - |
       EXTRA_TAG_ARGS=""
-      if [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ]; then
-        EXTRA_TAG_ARGS="-t ${CI_REGISTRY_IMAGE}:latest"
+      if [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ] || [ -n "$CI_COMMIT_TAG" ]; then
+        EXTRA_TAG_ARGS="-t ${CONTAINER_REGISTRY_URL}:latest"
       fi
       docker buildx build \
         --platform "$TARGET_PLATFORMS" \
-        -t "${CI_REGISTRY_IMAGE}:${TAG}" \
+        -t "${CONTAINER_REGISTRY_URL}:${TAG}" \
         $EXTRA_TAG_ARGS \
-        --cache-from "type=registry,ref=${CI_REGISTRY_IMAGE}:buildcache" \
-        --cache-to "type=registry,ref=${CI_REGISTRY_IMAGE}:buildcache,mode=max" \
+        --cache-from "type=registry,ref=${CONTAINER_REGISTRY_URL}:buildcache" \
+        --cache-to "type=registry,ref=${CONTAINER_REGISTRY_URL}:buildcache,mode=max" \
         --push \
         .
   rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
     - if: '$CI_COMMIT_TAG'
       when: on_success
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'

@@ -28,27 +28,31 @@ package de.gematik.zeta.testfachdienst.service;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import de.gematik.zeta.testfachdienst.config.SelfDisclosureProperties;
-import io.opentelemetry.api.common.AttributeKey;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
-/** Tests for {@link SelfDisclosureService}. */
+/**
+ * Tests for {@link SelfDisclosureService}.
+ */
 class SelfDisclosureServiceTest {
+
   private static final String VERSION_UNDER_TEST = "test-version";
 
+  /**
+   * Verifies that generated self-disclosure records contain configured attributes.
+   */
   @Test
   void generateSelfDisclosureRecordUsesConfiguredAttributes() {
-    SelfDisclosureProperties properties = new SelfDisclosureProperties();
+    var properties = new SelfDisclosureProperties();
     properties.setResourceAttributes(
         Map.of("product_name", "Testfachdienst", "product_version", VERSION_UNDER_TEST));
-    SelfDisclosureService service = new SelfDisclosureService(properties);
+    var service = new SelfDisclosureService(properties);
 
     var record = service.generateSelfDisclosureRecord();
 
-    assertThat(record.getAttributes().get(AttributeKey.stringKey("product_name")))
-        .isEqualTo("Testfachdienst");
-    assertThat(record.getAttributes().get(AttributeKey.stringKey("product_version")))
-        .isEqualTo(VERSION_UNDER_TEST);
-    assertThat(record.getBodyValue().asString()).isEqualTo("Selbstauskunft");
+    assertThat(record.body()).isEqualTo("Selbstauskunft");
+    assertThat(record.attributes())
+        .containsEntry("product_name", "Testfachdienst")
+        .containsEntry("product_version", VERSION_UNDER_TEST);
   }
 }

@@ -96,6 +96,7 @@ class TestfachdienstApplicationTests {
 
     assertThat(apiDocs.path("openapi").asText()).isNotBlank();
     assertThat(apiDocs.path("paths").has("/api/erezept")).isTrue();
+    assertThat(apiDocs.path("paths").has("/test-support/notifications")).isTrue();
     assertThat(apiDocs.at("/paths/~1api~1erezept/post/summary").asText())
         .isEqualTo("Create a new E-Rezept");
     assertThat(apiDocs.at("/paths/~1hellozeta/get/summary").asText())
@@ -109,6 +110,16 @@ class TestfachdienstApplicationTests {
         .isEqualTo("Hello ZETA!");
     assertThat(apiDocs.at("/components/schemas/ERezept/properties/prescriptionId/example").asText())
         .isEqualTo("RX-2025-000123");
+  }
+
+  @Test
+  void notificationTestSupportRejectsMalformedRequests()
+      throws IOException, InterruptedException {
+    HttpResponse<String> malformedResponse = post(
+        appUri("/test-support/notifications"),
+        "{\"user_id\":");
+
+    assertThat(malformedResponse.statusCode()).isEqualTo(400);
   }
 
   @Test
