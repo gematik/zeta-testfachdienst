@@ -28,7 +28,6 @@ package de.gematik.zeta.testfachdienst.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import de.gematik.zeta.testfachdienst.service.SelfDisclosureExportService;
 import org.jobrunr.scheduling.JobScheduler;
@@ -45,19 +44,22 @@ class JobControllerTest {
 
   @Mock private SelfDisclosureExportService selfDisclosureExportService;
 
+  /**
+   * Verifies that controller creation registers the recurring self-disclosure job.
+   */
   @Test
   void constructorSchedulesRecurringExportJob() {
-    when(selfDisclosureExportService.getExportIntervalInSeconds()).thenReturn(30L);
-
-    new JobController(jobScheduler, selfDisclosureExportService);
+    new JobController(jobScheduler, selfDisclosureExportService, 30L);
 
     verify(jobScheduler).createRecurrently(any());
   }
 
+  /**
+   * Verifies the lightweight job status endpoint.
+   */
   @Test
   void infoReturnsStatusPayload() {
-    when(selfDisclosureExportService.getExportIntervalInSeconds()).thenReturn(30L);
-    JobController controller = new JobController(jobScheduler, selfDisclosureExportService);
+    JobController controller = new JobController(jobScheduler, selfDisclosureExportService, 30L);
 
     assertThat(controller.info()).isEqualTo("{\"status\": \"fantastic!\"}");
   }

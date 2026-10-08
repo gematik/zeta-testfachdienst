@@ -9,7 +9,7 @@
 - Built with Spring Boot 4.0, Java 21, Spring Data JPA, Spring Security (permissive configuration),
   Lombok, SpringDoc OpenAPI, and
   Spring Boot Actuator.
-- Ships with opinionated logging (console + rolling file appender) and an unauthenticated API
+- Ships with console logging and OTLP log export support through OpenTelemetry, plus an unauthenticated API
   surface that can be
   hardened later if required.
 - Exposes context-aware health and info endpoints for deployment checks via Spring Boot Actuator.
@@ -44,9 +44,10 @@
   unauthenticated security filter chain suitable for infrastructure probes.
 - [application.yml](src/main/resources/application.yml) centralizes H2, SSL, actuator, and logging
   settings.
-- [logback-spring.xml](src/main/resources/logback-spring.xml) writes structured logs to console and
-  `./logs` with
-  rotation.
+- [logback-spring.xml](src/main/resources/logback-spring.xml) writes logs to console and forwards
+  events to the Spring Boot configured OpenTelemetry SDK.
+- [OpenTelemetryAppenderInitializer.java](src/main/java/de/gematik/zeta/testfachdienst/observability/OpenTelemetryAppenderInitializer.java)
+  connects the Logback OpenTelemetry appender to the application `OpenTelemetry` instance.
 - [libs.versions.toml](gradle/libs.versions.toml) defines dependency and plugin versions
 
 ## Configuration Highlights
@@ -59,15 +60,27 @@
   `SERVER_PORT` and `SERVER_CONTEXT_PATH`.
 - TLS toggled by `SERVER_SSL_ENABLED` (Gradle `bootRun` enables HTTPS using
   `src/main/resources/tls/keystore.p12`).
+- Mutual TLS is available through the `mtls` Spring profile. The profile expects
+  `TLS_KEYSTORE`, `TLS_KEYSTORE_PASSWORD`, `TLS_TRUSTSTORE`, and
+  `TLS_TRUSTSTORE_PASSWORD` and defaults `TLS_CLIENT_AUTH` to `need`. Keep
+  `MANAGEMENT_SERVER_SSL_CLIENT_AUTH=none` for Kubernetes HTTP probes unless
+  the probes are changed to present a client certificate. When the management
+  port is separate, configure `MANAGEMENT_TLS_KEYSTORE` and
+  `MANAGEMENT_TLS_KEYSTORE_PASSWORD` for the actuator HTTPS connector.
 - Authentication is disabled by default; all HTTP and actuator endpoints are publicly reachable so
   that infrastructure
   probes can operate without additional credentials.
 - Prometheus metrics export is enabled via Micrometer; `/actuator/prometheus` is available for
   scraping.
-- Package-level logging set to `DEBUG` for `de.gematik`; all other loggers default to `INFO`.
+- Application logging defaults to `INFO`; override the service package level with `APP_LOG_LEVEL`.
+- The container image disables the OpenTelemetry SDK by default via `OTEL_SDK_DISABLED=true`.
+  Set `OTEL_SDK_DISABLED=false` and configure the OTLP endpoint properties to export telemetry.
+  The ZETA Guard Helm chart does this when `testfachdienst.opentelemetry.enabled=true`.
 - Actuator exposes health and info endpoints; adjust `management.endpoints.web.exposure.include` in
   `application.yml` to
   publish more.
+- `NOTIFICATION_SERVICE_RS_BASE_URL` and `NOTIFICATION_SERVICE_RS_CHANNEL` select the downstream Notification Service and channel.
+- `NOTIFICATION_SERVICE_RS_CONNECT_TIMEOUT` and `NOTIFICATION_SERVICE_RS_READ_TIMEOUT` default to `2s` and `5s`.
 
 ## Prerequisites
 
@@ -96,7 +109,7 @@ snapshot can be refreshed with `./gradlew syncVersionMetadata`.
 ./gradlew bootRun
 ```
 
-Boot Run starts the app with SSL enabled. Use `https://localhost:8080/achelos_testfachdienst/...`
+`bootRun` starts the app with SSL enabled. Use `https://localhost:8080/achelos_testfachdienst/...`
 and add `-k`/
 `--insecure` to curl while using the bundled self-signed certificate.
 
@@ -155,43 +168,62 @@ prefix via `SERVER_CONTEXT_PATH`. Actuator endpoints are exposed on the manageme
 as the app by
 default, `8081` when the Kubernetes profile is active).
 
-| Method | Path (default context)                      | Description                                                  |
-|--------|---------------------------------------------|--------------------------------------------------------------|
-| GET    | `/hellozeta`                                | Returns the static hello payload; accepts optional `responseDelay` seconds as a query parameter. |
+| Method | Path (default context)                      | Description                                                                                                     |
+|--------|---------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
+| GET    | `/hellozeta`                                | Returns the static hello payload; accepts optional `responseDelay` seconds as a query parameter.                |
 | GET    | `/hellozeta/delay/{seconds}`                | Returns the static hello payload after the path-supplied non-negative delay; negative values return `HTTP 400`. |
-| GET    | `/hellozeta/proxy-error`                    | Returns the hello payload with `HTTP 400` and `ZETA-Cause: Proxy`. |
-| GET    | `/api/erezept`                              | Lists all stored prescriptions.                              |
-| POST   | `/api/erezept`                              | Creates a prescription (rejects duplicate `prescriptionId`). |
-| GET    | `/api/erezept/{id}`                         | Fetches a prescription by database id.                       |
-| PUT    | `/api/erezept/{id}`                         | Updates core fields on an existing prescription.             |
-| DELETE | `/api/erezept/{id}`                         | Removes a prescription if it exists.                         |
-| GET    | `/api/erezept/by-prescription/{businessId}` | Looks up a prescription by its domain id.                    |
-| GET    | `/actuator/health`                          | Composite health indicator (includes readiness + liveness).  |
-| GET    | `/actuator/health/liveness`                 | Liveness probe exposed via Spring Boot Actuator.             |
-| GET    | `/actuator/health/readiness`                | Readiness probe exposed via Spring Boot Actuator.            |
-| GET    | `/actuator/info`                            | Info endpoint populated via `application.yml`.               |
-| GET    | `/actuator/metrics`                         | Lists available metric names.                                |
-| GET    | `/actuator/metrics/{metricName}`            | Returns details and samples for a specific metric.           |
-| GET    | `/actuator/prometheus`                      | Prometheus metrics scrape endpoint (enabled in k8s profile). |
-| GET    | `/v3/api-docs`                              | Serves the OpenAPI document.                                 |
-| GET    | `/swagger-ui/index.html`                    | Interactive Swagger UI powered by SpringDoc.                 |
+| GET    | `/hellozeta/proxy-error`                    | Returns the hello payload with `HTTP 400` and `ZETA-Cause: Proxy`.                                              |
+| GET    | `/api/erezept`                              | Lists all stored prescriptions.                                                                                 |
+| POST   | `/api/erezept`                              | Creates a prescription (rejects duplicate `prescriptionId`).                                                    |
+| GET    | `/api/erezept/{id}`                         | Fetches a prescription by database id.                                                                          |
+| PUT    | `/api/erezept/{id}`                         | Updates core fields on an existing prescription.                                                                |
+| DELETE | `/api/erezept/{id}`                         | Removes a prescription if it exists.                                                                            |
+| GET    | `/api/erezept/by-prescription/{businessId}` | Looks up a prescription by its domain id.                                                                       |
+| GET    | `/push/v1/pushers`                          | Lists registered PushNotification pushers.                                                                      |
+| POST   | `/push/v1/pushers/set`                      | Creates, updates, or deletes a PushNotification pusher.                                                         |
+| GET    | `/push/v1/channels`                         | Lists available PushNotification channels.                                                                      |
+| GET    | `/push/v1/channels/{pushkey}`               | Lists channels for a registered device.                                                                         |
+| POST   | `/push/v1/channels/{pushkey}`               | Updates channel states for a registered device.                                                                 |
+| POST   | `/test-support/notifications`               | Emits a correlated notification event.                                                                         |
+| GET    | `/actuator/health`                          | Composite health indicator (includes readiness + liveness).                                                     |
+| GET    | `/actuator/health/liveness`                 | Liveness probe exposed via Spring Boot Actuator.                                                                |
+| GET    | `/actuator/health/readiness`                | Readiness probe exposed via Spring Boot Actuator.                                                               |
+| GET    | `/actuator/info`                            | Info endpoint populated via `application.yml`.                                                                  |
+| GET    | `/actuator/metrics`                         | Lists available metric names.                                                                                   |
+| GET    | `/actuator/metrics/{metricName}`            | Returns details and samples for a specific metric.                                                              |
+| GET    | `/actuator/prometheus`                      | Prometheus metrics scrape endpoint (enabled in k8s profile).                                                    |
+| GET    | `/v3/api-docs`                              | Serves the OpenAPI document.                                                                                    |
+| GET    | `/swagger-ui/index.html`                    | Interactive Swagger UI powered by SpringDoc.                                                                    |
+
+The PushNotification setup routes implement the Fachdienst API from
+[gemF_PushNotification latest](https://gemspec.gematik.de/docs/gemF/gemF_PushNotification/latest/)
+and the referenced `OpenApi_Notification_Fachdienst`. Covered AFOs are `A_27104`,
+`A_27154`, `A_27155`, `A_27156`, `A_27190`, `A_27193-02`, and `A_27197-01`.
+The checked-in source snapshot is
+[`docs/gemF_PushNotification_V1.3.0.xml`](docs/gemF_PushNotification_V1.3.0.xml).
+The official referenced Fachdienst OpenAPI is stored as
+[`docs/OpenApi_Notification_Fachdienst_V1.1.0.yaml`](docs/OpenApi_Notification_Fachdienst_V1.1.0.yaml).
+
+PushNotification app registrations use a single pusher per `pushkey`. Channel status lists are addressed by `pushkey` only, matching
+`GET /channels/{pushkey}` and `POST /channels/{pushkey}` in
+`OpenApi_Notification_Fachdienst`. Deregistering the pusher deletes that device's channel status list, as required by `A_27197-01`.
 
 Example curl against the hello endpoint (HTTP mode):
 
 ```bash
-curl https://localhost:8080/achelos_testfachdienst/hellozeta
+curl http://localhost:8080/achelos_testfachdienst/hellozeta
 ```
 
 Example curl against the delayed hello endpoint (HTTP mode):
 
 ```bash
-curl https://localhost:8080/achelos_testfachdienst/hellozeta/delay/2
+curl http://localhost:8080/achelos_testfachdienst/hellozeta/delay/2
 ```
 
 Example curl against the health endpoint (HTTP mode):
 
 ```bash
-curl https://localhost:8080/achelos_testfachdienst/actuator/health
+curl http://localhost:8080/achelos_testfachdienst/actuator/health
 ```
 
 ## WebSocket (STOMP) + AsyncAPI
@@ -226,7 +258,6 @@ viewable in a small bundled UI.
 ### AsyncAPI (code-first) docs
 
 - JSON spec: ``https://localhost:8080/achelos_testfachdienst/springwolf/docs``
-- YAML spec: ``https://localhost:8080/achelos_testfachdienst/springwolf/docs.yaml``
 - UI: ``https://localhost:8080/achelos_testfachdienst/springwolf/asyncapi-ui.html``
 
 The AsyncAPI is generated by Springwolf scanning ``@MessageMapping`` methods and
@@ -234,6 +265,16 @@ The AsyncAPI is generated by Springwolf scanning ``@MessageMapping`` methods and
 For unambiguous schemas,
 we pin payload types with ``@AsyncMessage(payload = ERezept.class)`` or ``ERezept[].class`` for list
 responses.
+
+Checked-in API documentation snapshots can be refreshed from generated runtime endpoints:
+
+```bash
+./gradlew updateApiDocs
+```
+
+Use ``./gradlew updateSwaggerApiDocs`` or ``./gradlew updateSpringwolfApiDocs`` when only one snapshot
+should be updated. The Swagger snapshot is written to ``docs/swagger-api-docs.json`` and the Springwolf
+snapshot is written to ``docs/async-api-docs.yml``.
 
 ### cURL quick checks (spec & UI)
 
@@ -248,24 +289,33 @@ curl -k https://localhost:8080/achelos_testfachdienst/springwolf/asyncapi-ui.htm
 > When running via ``./gradlew bootRun``, HTTPS is enabled by default in this project;
 > use ``-k/--insecure`` for local self-signed certs.
 
-## Exemplary self disclosure export 
-This service allows to configure an OTLP based export of a self disclosure log record (see A_27494-01, gemSpec_ZETA)
-using the official [OpenTelemetry SDK](https://opentelemetry.io/docs/languages/java/intro/) to generate and export
-OTLP and gemSpec_ZETA conformant log records and [Jobrunr](https://www.jobrunr.io/) to manage the recurring background 
-task.
+## Exemplary self disclosure export
+This service emits a structured self disclosure log record (see A_27494-01, gemSpec_ZETA). The
+Logback OpenTelemetry appender forwards that record through the Spring Boot configured OTLP logging
+exporter when OpenTelemetry is enabled.
+[JobRunr](https://www.jobrunr.io/) manages the recurring background task.
 
-The configuration parameters for the OTLP exporter are located at the `otlp` key in the 
-[application.yaml](./src/main/resources/application.yml).
-For convenience all of those options can also be configured through their respective environment variables, please 
-consult the [application.yaml](./src/main/resources/application.yml) for details.
+For OTLP log export, configure at least:
 
+```bash
+OTEL_SDK_DISABLED=false
+MANAGEMENT_LOGGING_EXPORT_OTLP_ENABLED=true
+MANAGEMENT_OPENTELEMETRY_LOGGING_EXPORT_OTLP_ENDPOINT=http://telemetry-gateway-local:4318/v1/logs
+MANAGEMENT_OPENTELEMETRY_LOGGING_EXPORT_OTLP_TRANSPORT=http
+```
 
-The configuration parameters for the - more or less - static values of the self disclosure are located at the 
-`selfdisclosure` key in the [application.yaml](./src/main/resources/application.yml).
+The appender captures SLF4J fluent key/value pairs, so the self disclosure attributes are exported
+as OpenTelemetry log attributes alongside the `Selbstauskunft` body.
+
+The configuration parameter for the self disclosure interval is located at the
+`selfdisclosure.export.intervalSeconds` key in the [application.yml](./src/main/resources/application.yml).
+
+The configuration parameters for the - more or less - static values of the self disclosure are located at the
+`selfdisclosure` key in the [application.yml](./src/main/resources/application.yml).
 
 The configuration parameters for the `jobrunr` values are located at the `jobrunr` key in the
-[application.yaml](./src/main/resources/application.yml).
-Please consult the [Jobruner documentation](https://www.jobrunr.io/en/documentation/configuration/spring/) for details 
+[application.yml](./src/main/resources/application.yml).
+Please consult the [JobRunr documentation](https://www.jobrunr.io/en/documentation/configuration/spring/) for details
 on how to configure `jobrunr`.
 
 
@@ -294,7 +344,8 @@ with nested overlay filesystems.
 ## Logging and Observability
 
 - Application banner resides in `src/main/resources/banner.txt`.
-- Logback writes to console and `./logs/spring-boot-logger.log` with size and time based rotation.
+- Logback writes to console and to the OpenTelemetry appender.
+- When enabled, Spring Boot exports logs, traces, and metrics to the configured OTLP collector.
 - SLF4J is used consistently across services, controllers, and configuration.
 - Actuator endpoints are included out of the box; extend exposure or add custom health indicators as
   required.

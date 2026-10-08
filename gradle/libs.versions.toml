@@ -10,18 +10,18 @@ graalvm-native = "0.11.1"
 checkstyle = "12.1.1"
 jacoco = "0.8.12"
 versions = "0.53.0"
-opentelemetry-bom = "1.56.0"
 protobuf = "4.33.1"
 jobrunr = "8.5.0"
+opentelemetry-logback-appender = "2.21.0-alpha"
 
 [libraries]
 springdoc = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
 springwolfstomp = { module = "io.github.springwolf:springwolf-stomp", version.ref = "springwolf" }
 springwolfstompbinding = { module = "io.github.springwolf:springwolf-stomp-binding", version.ref = "springwolf" }
 springwolfui = { module = "io.github.springwolf:springwolf-ui", version.ref = "springwolf" }
-opentelemetrybom = { module = "io.opentelemetry:opentelemetry-bom", version.ref = "opentelemetry-bom" }
 protobuf = { module = "com.google.protobuf:protobuf-java", version.ref = "protobuf" }
 jobrunr = { module = "org.jobrunr:jobrunr-spring-boot-4-starter", version.ref = "jobrunr" }
+opentelemetry-logback-appender = { module = "io.opentelemetry.instrumentation:opentelemetry-logback-appender-1.0", version.ref = "opentelemetry-logback-appender" }
 
 [plugins]
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }

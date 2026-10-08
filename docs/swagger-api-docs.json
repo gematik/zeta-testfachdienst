@@ -1,370 +1,633 @@
 {
-  "openapi": "3.1.0",
-  "info": {
-    "title": "OpenAPI definition",
-    "version": "v0"
+  "openapi" : "3.1.0",
+  "info" : {
+    "title" : "OpenAPI definition",
+    "version" : "v0"
   },
-  "servers": [
-    {
-      "url": "https://localhost:8080/achelos_testfachdienst",
-      "description": "Generated server url"
+  "servers" : [ {
+    "url" : "https://localhost:8080/achelos_testfachdienst",
+    "description" : "Generated server url"
+  } ],
+  "tags" : [ {
+    "name" : "Hello ZETA",
+    "description" : "Showcase endpoints used to verify simple REST behavior and proxy error handling"
+  }, {
+    "name" : "PushNotification",
+    "description" : "gemF PushNotification setup routes for pushers and channels",
+    "externalDocs" : {
+      "description" : "gemF_PushNotification latest",
+      "url" : "https://gemspec.gematik.de/docs/gemF/gemF_PushNotification/latest/"
     }
-  ],
-  "paths": {
-    "/api/erezept/{id}": {
-      "get": {
-        "tags": [
-          "erezept-controller"
-        ],
-        "operationId": "get",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ERezept"
+  }, {
+    "name" : "E-Rezept",
+    "description" : "CRUD API for managing electronic prescriptions stored by the test service"
+  }, {
+    "name" : "Jobs",
+    "description" : "Operational endpoints for background job scheduling and status inspection"
+  } ],
+  "paths" : {
+    "/api/erezept/{id}" : {
+      "get" : {
+        "tags" : [ "E-Rezept" ],
+        "summary" : "Get an E-Rezept by database id",
+        "description" : "Looks up a single prescription by its generated numeric identifier.",
+        "operationId" : "get",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "Database identifier of the prescription",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "example" : 1
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Prescription found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ERezept"
+                },
+                "example" : {
+                  "id" : 1,
+                  "medicationName" : "Ibuprofen 400 mg",
+                  "dosage" : "1 tablet, 3x daily after meals",
+                  "issuedAt" : "2026-03-09T10:15:30Z",
+                  "expiresAt" : "2026-06-09T10:15:30Z",
+                  "status" : "CREATED",
+                  "patientId" : "PAT-123456",
+                  "practitionerId" : "PRAC-98765",
+                  "prescriptionId" : "RX-2026-000123"
                 }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "erezept-controller"
-        ],
-        "operationId": "update",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ERezept"
               }
             }
           },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "object"
+          "404" : {
+            "description" : "Prescription not found",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ERezept"
                 }
               }
             }
           }
         }
       },
-      "delete": {
-        "tags": [
-          "erezept-controller"
-        ],
-        "operationId": "delete",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
+      "put" : {
+        "tags" : [ "E-Rezept" ],
+        "summary" : "Update an existing E-Rezept",
+        "description" : "Replaces the mutable state of an existing prescription.",
+        "operationId" : "update",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "Database identifier of the prescription",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "example" : 1
+        } ],
+        "requestBody" : {
+          "description" : "New prescription state",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ERezept"
+              },
+              "example" : {
+                "medicationName" : "Ibuprofen 400 mg",
+                "dosage" : "1 tablet, 3x daily after meals",
+                "issuedAt" : "2026-03-09T10:15:30Z",
+                "expiresAt" : "2026-06-09T10:15:30Z",
+                "status" : "CREATED",
+                "patientId" : "PAT-123456",
+                "practitionerId" : "PRAC-98765",
+                "prescriptionId" : "RX-2026-000123"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Prescription updated",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ERezept"
+                },
+                "example" : {
+                  "id" : 1,
+                  "medicationName" : "Ibuprofen 400 mg",
+                  "dosage" : "1 tablet, 3x daily after meals",
+                  "issuedAt" : "2026-03-09T10:15:30Z",
+                  "expiresAt" : "2026-06-09T10:15:30Z",
+                  "status" : "CREATED",
+                  "patientId" : "PAT-123456",
+                  "practitionerId" : "PRAC-98765",
+                  "prescriptionId" : "RX-2026-000123"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Prescription not found",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
             }
           }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
+        }
+      },
+      "delete" : {
+        "tags" : [ "E-Rezept" ],
+        "summary" : "Delete an E-Rezept",
+        "description" : "Removes a prescription from the service by its database id.",
+        "operationId" : "delete",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "Database identifier of the prescription",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "example" : 1
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Prescription deleted"
+          },
+          "404" : {
+            "description" : "Prescription not found"
           }
         }
       }
     },
-    "/api/erezept": {
-      "get": {
-        "tags": [
-          "erezept-controller"
-        ],
-        "operationId": "list",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ERezept"
+    "/test-support/notifications" : {
+      "post" : {
+        "tags" : [ "Notification test events" ],
+        "summary" : "Emits a deterministic notification test event",
+        "operationId" : "trigger",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/de.gematik.zeta.testfachdienst.model.NotificationEventRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "4XX" : {
+            "description" : "Invalid request or request rejected by the Notification Service",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/org.springframework.http.ProblemDetail"
+                }
+              }
+            }
+          },
+          "502" : {
+            "description" : "The Notification Service returned an invalid response",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/org.springframework.http.ProblemDetail"
+                }
+              }
+            }
+          },
+          "503" : {
+            "description" : "The Notification Service is unavailable",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/org.springframework.http.ProblemDetail"
+                }
+              }
+            }
+          },
+          "202" : {
+            "description" : "Accepted",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/de.gematik.zeta.testfachdienst.model.NotificationEventResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/push/v1/pushers/set" : {
+      "post" : {
+        "tags" : [ "PushNotification" ],
+        "summary" : "Modify a pusher",
+        "description" : "Creates or updates a pusher when kind is not null, deletes it when kind is null. Implements A_27154, A_27155, A_27156, A_27193-02, and A_27197-01 from OpenApi_Notification_Fachdienst.",
+        "operationId" : "setPusher",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PushPusher"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "The pusher was set",
+            "content" : {
+              "application/json" : {
+                "example" : { }
+              }
+            }
+          },
+          "400" : {
+            "description" : "One or more pusher values were invalid",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PushErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/push/v1/channels/{pushkey}" : {
+      "get" : {
+        "tags" : [ "PushNotification" ],
+        "summary" : "Gets channels for a specific device",
+        "description" : "Returns configured channel states for a registered device. Implements A_27190 from OpenApi_Notification_Fachdienst.",
+        "operationId" : "getChannelsOfDevice",
+        "parameters" : [ {
+          "name" : "pushkey",
+          "in" : "path",
+          "description" : "Device push key",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : 1234567890
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "PushNotification" ],
+        "summary" : "Modify the channels for a specific device",
+        "description" : "Updates channel subscriptions for a registered device. Implements A_27190 from OpenApi_Notification_Fachdienst.",
+        "operationId" : "setChannelsOfDevice",
+        "parameters" : [ {
+          "name" : "pushkey",
+          "in" : "path",
+          "description" : "Device push key",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : 1234567890
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PushChannelsResponse"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/erezept" : {
+      "get" : {
+        "tags" : [ "E-Rezept" ],
+        "summary" : "List all E-Rezepte",
+        "description" : "Returns every prescription currently stored in the service.",
+        "operationId" : "list",
+        "responses" : {
+          "200" : {
+            "description" : "Prescription list returned",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ERezept"
                   }
-                }
+                },
+                "example" : [ {
+                  "id" : 1,
+                  "medicationName" : "Ibuprofen 400 mg",
+                  "dosage" : "1 tablet, 3x daily after meals",
+                  "issuedAt" : "2026-03-09T10:15:30Z",
+                  "expiresAt" : "2026-06-09T10:15:30Z",
+                  "status" : "CREATED",
+                  "patientId" : "PAT-123456",
+                  "practitionerId" : "PRAC-98765",
+                  "prescriptionId" : "RX-2026-000123"
+                } ]
               }
             }
           }
         }
       },
-      "post": {
-        "tags": [
-          "erezept-controller"
-        ],
-        "operationId": "create",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ERezept"
+      "post" : {
+        "tags" : [ "E-Rezept" ],
+        "summary" : "Create a new E-Rezept",
+        "description" : "Stores a new prescription and returns the persisted resource together with a Location header pointing to the created entity.",
+        "operationId" : "create",
+        "requestBody" : {
+          "description" : "Prescription payload to create",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ERezept"
+              },
+              "example" : {
+                "medicationName" : "Ibuprofen 400 mg",
+                "dosage" : "1 tablet, 3x daily after meals",
+                "issuedAt" : "2026-03-09T10:15:30Z",
+                "expiresAt" : "2026-06-09T10:15:30Z",
+                "status" : "CREATED",
+                "patientId" : "PAT-123456",
+                "practitionerId" : "PRAC-98765",
+                "prescriptionId" : "RX-2026-000123"
               }
             }
           },
-          "required": true
+          "required" : true
         },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/springwolf/ui-config": {
-      "get": {
-        "tags": [
-          "ui-config-controller"
-        ],
-        "operationId": "getUiConfig",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/io.github.springwolf.core.controller.UiConfigController.UiConfig"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/springwolf/docs": {
-      "get": {
-        "tags": [
-          "async-api-controller"
-        ],
-        "operationId": "asyncApiYaml",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/yaml": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/springwolf/docs/{group}": {
-      "get": {
-        "tags": [
-          "async-api-controller"
-        ],
-        "operationId": "asyncApiYaml_1",
-        "parameters": [
-          {
-            "name": "group",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/yaml": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/springwolf/docs.yaml": {
-      "get": {
-        "tags": [
-          "async-api-controller"
-        ],
-        "operationId": "asyncApiYaml_2",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/yaml": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/springwolf/docs.json": {
-      "get": {
-        "tags": [
-          "async-api-controller"
-        ],
-        "operationId": "asyncApiJson",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/hellozeta": {
-      "get": {
-        "tags": [
-          "hello-zeta-controller"
-        ],
-        "operationId": "getHelloZetaResponse",
-        "parameters": [
-          {
-            "name": "responseDelay",
-            "in": "query",
-            "description": "Optional response delay in seconds.",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/de.gematik.zeta.testfachdienst.model.HelloZetaResource"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/hellozeta/delay/{seconds}": {
-      "get": {
-        "tags": [
-          "hello-zeta-controller"
-        ],
-        "operationId": "getHelloZetaResponseWithPathDelay",
-        "parameters": [
-          {
-            "name": "seconds",
-            "in": "path",
-            "description": "Required non-negative response delay in seconds.",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/de.gematik.zeta.testfachdienst.model.HelloZetaResource"
+        "responses" : {
+          "201" : {
+            "description" : "Prescription created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ERezept"
+                },
+                "example" : {
+                  "id" : 1,
+                  "medicationName" : "Ibuprofen 400 mg",
+                  "dosage" : "1 tablet, 3x daily after meals",
+                  "issuedAt" : "2026-03-09T10:15:30Z",
+                  "expiresAt" : "2026-06-09T10:15:30Z",
+                  "status" : "CREATED",
+                  "patientId" : "PAT-123456",
+                  "practitionerId" : "PRAC-98765",
+                  "prescriptionId" : "RX-2026-000123"
                 }
               }
             }
           },
-          "400": {
-            "description": "Bad Request"
+          "409" : {
+            "description" : "A prescription with the same prescriptionId already exists",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            }
           }
         }
       }
     },
-    "/hellozeta/proxy-error": {
-      "get": {
-        "tags": [
-          "hello-zeta-controller"
-        ],
-        "operationId": "getHelloZetaProxyErrorResponse",
-        "responses": {
-          "400": {
-            "description": "Bad Request",
-            "headers": {
-              "ZETA-Cause": {
-                "description": "Reason for the proxy-specific failure.",
-                "schema": {
-                  "type": "string"
+    "/springwolf/ui-config" : {
+      "get" : {
+        "tags" : [ "ui-config-controller" ],
+        "operationId" : "getUiConfig",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/io.github.springwolf.core.controller.UiConfigController.UiConfig"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/springwolf/docs" : {
+      "get" : {
+        "tags" : [ "async-api-controller" ],
+        "operationId" : "asyncApiYaml",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/yaml" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/springwolf/docs/{group}" : {
+      "get" : {
+        "tags" : [ "async-api-controller" ],
+        "operationId" : "asyncApiYaml_1",
+        "parameters" : [ {
+          "name" : "group",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/yaml" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/push/v1/pushers" : {
+      "get" : {
+        "tags" : [ "PushNotification" ],
+        "summary" : "Gets the current pushers",
+        "description" : "Returns all currently active pushers for the current test context. Implements A_27104 from OpenApi_Notification_Fachdienst.",
+        "operationId" : "getPushers",
+        "responses" : {
+          "200" : {
+            "description" : "Pushers returned",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PushPushersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/push/v1/channels" : {
+      "get" : {
+        "tags" : [ "PushNotification" ],
+        "summary" : "Gets the available channels",
+        "description" : "Returns all channels available to PushNotification clients. Implements A_27190 from OpenApi_Notification_Fachdienst.",
+        "operationId" : "getChannels",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PushChannelsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/jobs/info" : {
+      "get" : {
+        "tags" : [ "Jobs" ],
+        "summary" : "Return background job status information",
+        "description" : "Provides a lightweight status payload for the recurring self-disclosure export job scheduling setup.",
+        "operationId" : "info",
+        "responses" : {
+          "200" : {
+            "description" : "Job status returned successfully",
+            "content" : {
+              "text/plain" : {
+                "schema" : {
+                  "type" : "string"
+                },
+                "example" : {
+                  "status" : "fantastic!"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/hellozeta" : {
+      "get" : {
+        "tags" : [ "Hello ZETA" ],
+        "summary" : "Return the Hello ZETA greeting",
+        "description" : "Provides a minimal JSON payload that can be used as a smoke-test endpoint. The optional responseDelay query parameter delays the response by the given number of seconds.",
+        "operationId" : "getHelloZetaResponse",
+        "parameters" : [ {
+          "name" : "responseDelay",
+          "in" : "query",
+          "description" : "Optional response delay in seconds.",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Greeting returned successfully",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/HelloZetaResource"
+                },
+                "example" : {
+                  "message" : "Hello ZETA!"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/hellozeta/proxy-error" : {
+      "get" : {
+        "tags" : [ "Hello ZETA" ],
+        "summary" : "Return a synthetic proxy error",
+        "description" : "Returns the normal greeting payload but with HTTP 400 and the ZETA-Cause header set to Proxy so callers can test error-handling flows.",
+        "operationId" : "getHelloZetaProxyErrorResponse",
+        "responses" : {
+          "400" : {
+            "description" : "Synthetic proxy error returned",
+            "headers" : {
+              "ZETA-Cause" : {
+                "description" : "Reason for the proxy-specific failure.",
+                "style" : "simple",
+                "schema" : {
+                  "type" : "object",
+                  "example" : "Proxy"
                 }
               }
             },
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/de.gematik.zeta.testfachdienst.model.HelloZetaResource"
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/HelloZetaResource"
+                },
+                "example" : {
+                  "message" : "Hello ZETA!"
                 }
               }
             }
@@ -372,29 +635,93 @@
         }
       }
     },
-    "/api/erezept/by-prescription/{prescriptionId}": {
-      "get": {
-        "tags": [
-          "erezept-controller"
-        ],
-        "operationId": "byPrescriptionId",
-        "parameters": [
-          {
-            "name": "prescriptionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
+    "/hellozeta/delay/{seconds}" : {
+      "get" : {
+        "tags" : [ "Hello ZETA" ],
+        "summary" : "Get the Hello ZETA payload with a path-based delay",
+        "description" : "Returns the static greeting payload after waiting for the requested non-negative number of seconds.",
+        "operationId" : "getHelloZetaResponseWithPathDelay",
+        "parameters" : [ {
+          "name" : "seconds",
+          "in" : "path",
+          "description" : "Required non-negative response delay in seconds.",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Greeting payload returned successfully after the requested delay",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/HelloZetaResource"
+                },
+                "example" : {
+                  "message" : "Hello ZETA!"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "The supplied delay is negative",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/HelloZetaResource"
+                }
+              }
             }
           }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ERezept"
+        }
+      }
+    },
+    "/api/erezept/by-prescription/{prescriptionId}" : {
+      "get" : {
+        "tags" : [ "E-Rezept" ],
+        "summary" : "Get an E-Rezept by prescription id",
+        "description" : "Looks up a single prescription using its business identifier.",
+        "operationId" : "byPrescriptionId",
+        "parameters" : [ {
+          "name" : "prescriptionId",
+          "in" : "path",
+          "description" : "External prescription identifier",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "RX-2026-000123"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Prescription found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ERezept"
+                },
+                "example" : {
+                  "id" : 1,
+                  "medicationName" : "Ibuprofen 400 mg",
+                  "dosage" : "1 tablet, 3x daily after meals",
+                  "issuedAt" : "2026-03-09T10:15:30Z",
+                  "expiresAt" : "2026-06-09T10:15:30Z",
+                  "status" : "CREATED",
+                  "patientId" : "PAT-123456",
+                  "practitionerId" : "PRAC-98765",
+                  "prescriptionId" : "RX-2026-000123"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Prescription not found",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ERezept"
                 }
               }
             }
@@ -403,126 +730,295 @@
       }
     }
   },
-  "components": {
-    "schemas": {
-      "ERezept": {
-        "type": "object",
-        "description": "A prescription (ERezept)",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64",
-            "description": "Unique identifier",
-            "example": 123,
-            "readOnly": true
+  "components" : {
+    "schemas" : {
+      "ERezept" : {
+        "type" : "object",
+        "description" : "A prescription (ERezept)",
+        "properties" : {
+          "id" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "Unique identifier",
+            "example" : 123,
+            "readOnly" : true
           },
-          "medicationName": {
-            "type": "string",
-            "description": "Medication name",
-            "example": "Ibuprofen 400 mg",
-            "minLength": 1
+          "medicationName" : {
+            "type" : "string",
+            "description" : "Medication name",
+            "example" : "Ibuprofen 400 mg",
+            "minLength" : 1
           },
-          "dosage": {
-            "type": "string",
-            "description": "Dosage instructions",
-            "example": 1,
-            "minLength": 1
+          "dosage" : {
+            "type" : "string",
+            "description" : "Dosage instructions",
+            "example" : "1 tablet, 3× daily after meals",
+            "minLength" : 1
           },
-          "issuedAt": {
-            "type": "string",
-            "format": "date-time",
-            "description": "When it was issued (ISO-8601)",
-            "example": "2025-09-22T10:30:00Z"
+          "issuedAt" : {
+            "type" : "string",
+            "format" : "date-time",
+            "description" : "When it was issued (ISO-8601)",
+            "example" : "2025-09-22T10:30:00Z"
           },
-          "expiresAt": {
-            "type": "string",
-            "format": "date-time",
-            "description": "When it expires (ISO-8601)",
-            "example": "2025-12-31T23:59:59Z"
+          "expiresAt" : {
+            "type" : "string",
+            "format" : "date-time",
+            "description" : "When it expires (ISO-8601)",
+            "example" : "2025-12-31T23:59:59Z"
           },
-          "status": {
-            "type": "string",
-            "description": "Current status",
-            "enum": [
-              "CREATED",
-              "SIGNED",
-              "DISPENSED",
-              "CANCELLED",
-              "EXPIRED"
-            ]
+          "status" : {
+            "type" : "string",
+            "description" : "Current status",
+            "enum" : [ "CREATED", "SIGNED", "DISPENSED", "CANCELLED", "EXPIRED" ]
           },
-          "patientId": {
-            "type": "string",
-            "description": "FHIR/PKV patient identifier",
-            "example": "PAT-123456",
-            "minLength": 1
+          "patientId" : {
+            "type" : "string",
+            "description" : "FHIR/PKV patient identifier",
+            "example" : "PAT-123456",
+            "minLength" : 1
           },
-          "practitionerId": {
-            "type": "string",
-            "description": "Identifier of prescribing practitioner",
-            "example": "PRAC-98765",
-            "minLength": 1
+          "practitionerId" : {
+            "type" : "string",
+            "description" : "Identifier of prescribing practitioner",
+            "example" : "PRAC-98765",
+            "minLength" : 1
           },
-          "prescriptionId": {
-            "type": "string",
-            "description": "Prescription identifier",
-            "example": "RX-2025-000123",
-            "minLength": 1
+          "prescriptionId" : {
+            "type" : "string",
+            "description" : "Prescription identifier",
+            "example" : "RX-2025-000123",
+            "minLength" : 1
           }
         },
-        "required": [
-          "dosage",
-          "medicationName",
-          "patientId",
-          "practitionerId",
-          "prescriptionId"
-        ],
-        "title": "Erezept"
+        "required" : [ "dosage", "medicationName", "patientId", "practitionerId", "prescriptionId" ]
       },
-      "io.github.springwolf.core.controller.UiConfigController.UiConfig": {
-        "type": "object",
-        "properties": {
-          "initialConfig": {
-            "$ref": "#/components/schemas/io.github.springwolf.core.controller.UiConfigController.UiConfig.InitialConfig"
+      "de.gematik.zeta.testfachdienst.model.NotificationEventRequest" : {
+        "type" : "object",
+        "properties" : {
+          "user_id" : {
+            "type" : "string",
+            "minLength" : 1
           },
-          "groups": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/io.github.springwolf.core.controller.UiConfigController.UiConfig.UiConfigGroup"
+          "event_type" : {
+            "type" : "string",
+            "enum" : [ "registered_client_activity", "new_client_registration" ]
+          },
+          "correlation_id" : {
+            "type" : "string",
+            "minLength" : 1
+          }
+        },
+        "required" : [ "correlation_id", "event_type", "user_id" ],
+        "title" : "NotificationEventRequest"
+      },
+      "org.springframework.http.ProblemDetail" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "string",
+            "format" : "uri"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "detail" : {
+            "type" : "string"
+          },
+          "instance" : {
+            "type" : "string",
+            "format" : "uri"
+          },
+          "properties" : {
+            "type" : "object",
+            "additionalProperties" : { }
+          }
+        }
+      },
+      "de.gematik.zeta.testfachdienst.model.NotificationEventResponse" : {
+        "type" : "object",
+        "properties" : {
+          "notification_id" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "channel" : {
+            "type" : "string"
+          },
+          "accepted_at" : {
+            "type" : "string"
+          }
+        },
+        "title" : "NotificationEventResponse"
+      },
+      "PushPusher" : {
+        "type" : "object",
+        "description" : "PushNotification pusher registration for A_27104, A_27154, A_27155, and A_27156",
+        "properties" : {
+          "pushkey" : {
+            "type" : "string",
+            "description" : "Unique device push key required by A_27154, A_27155, and A_27156",
+            "example" : "<APNS/GCM TOKEN>"
+          },
+          "kind" : {
+            "type" : "string",
+            "description" : "Pusher kind; null deletes the pusher according to A_27156",
+            "example" : "http"
+          },
+          "app_id" : {
+            "type" : "string",
+            "description" : "Reverse-DNS app identifier required by A_27154 and A_27155",
+            "example" : "com.example.app.ios"
+          },
+          "app_display_name" : {
+            "type" : "string",
+            "description" : "Application display name required for pusher registration",
+            "example" : "Mat Rix"
+          },
+          "device_display_name" : {
+            "type" : "string",
+            "description" : "Device display name required for pusher registration",
+            "example" : "iPhone 9"
+          },
+          "profile_tag" : {
+            "type" : "string",
+            "description" : "Profile tag"
+          },
+          "lang" : {
+            "type" : "string",
+            "description" : "Preferred language required for pusher registration",
+            "example" : "en-US"
+          },
+          "data" : {
+            "type" : "object",
+            "additionalProperties" : { },
+            "description" : "Pusher implementation data required for pusher registration"
+          },
+          "encryption" : {
+            "type" : "object",
+            "additionalProperties" : { },
+            "description" : "Pusher encryption data"
+          },
+          "append" : {
+            "type" : "boolean",
+            "description" : "Whether the pusher should be appended"
+          }
+        },
+        "title" : "PushPusher"
+      },
+      "PushErrorResponse" : {
+        "type" : "object",
+        "description" : "PushNotification error response from OpenApi_Notification_Fachdienst",
+        "properties" : {
+          "error" : {
+            "type" : "string",
+            "description" : "Human readable error message",
+            "example" : "Missing parameters: lang"
+          },
+          "errcode" : {
+            "type" : "string",
+            "description" : "Matrix-style error code",
+            "example" : "M_MISSING_PARAM"
+          }
+        }
+      },
+      "PushChannel" : {
+        "type" : "object",
+        "description" : "Push notification channel state for A_27190",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "Channel identifier",
+            "example" : "erezept"
+          },
+          "status" : {
+            "type" : "string",
+            "description" : "Channel status for A_27190; defaults to not_set for A_27193-02",
+            "enum" : [ "enabled", "disabled", "not_set" ],
+            "example" : "enabled"
+          }
+        },
+        "title" : "PushChannel"
+      },
+      "PushChannelsResponse" : {
+        "type" : "object",
+        "description" : "List of push notification channels for A_27190",
+        "properties" : {
+          "channels" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/PushChannel",
+              "description" : "Channel entries for A_27190"
             }
           }
         },
-        "title": "UiConfig"
+        "title" : "PushChannelsResponse"
       },
-      "io.github.springwolf.core.controller.UiConfigController.UiConfig.InitialConfig": {
-        "type": "object",
-        "properties": {
-          "showBindings": {
-            "type": "boolean"
+      "io.github.springwolf.core.controller.UiConfigController.UiConfig" : {
+        "type" : "object",
+        "properties" : {
+          "initialConfig" : {
+            "$ref" : "#/components/schemas/io.github.springwolf.core.controller.UiConfigController.UiConfig.InitialConfig"
           },
-          "showHeaders": {
-            "type": "boolean"
+          "groups" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/io.github.springwolf.core.controller.UiConfigController.UiConfig.UiConfigGroup"
+            }
           }
         },
-        "title": "InitialConfig"
+        "title" : "UiConfig"
       },
-      "io.github.springwolf.core.controller.UiConfigController.UiConfig.UiConfigGroup": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
+      "io.github.springwolf.core.controller.UiConfigController.UiConfig.InitialConfig" : {
+        "type" : "object",
+        "properties" : {
+          "showBindings" : {
+            "type" : "boolean"
+          },
+          "showHeaders" : {
+            "type" : "boolean"
           }
         },
-        "title": "UiConfigGroup"
+        "title" : "InitialConfig"
       },
-      "de.gematik.zeta.testfachdienst.model.HelloZetaResource": {
-        "type": "object",
-        "properties": {
-          "message": {
-            "type": "string"
+      "io.github.springwolf.core.controller.UiConfigController.UiConfig.UiConfigGroup" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
           }
         },
-        "title": "HelloZetaResource"
+        "title" : "UiConfigGroup"
+      },
+      "PushPushersResponse" : {
+        "type" : "object",
+        "description" : "List of registered pushers for A_27104",
+        "properties" : {
+          "pushers" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/PushPusher",
+              "description" : "Registered pushers returned by A_27104"
+            }
+          }
+        }
+      },
+      "HelloZetaResource" : {
+        "type" : "object",
+        "description" : "Simple greeting payload returned by Hello ZETA endpoints",
+        "properties" : {
+          "message" : {
+            "type" : "string",
+            "description" : "Greeting text returned to the caller",
+            "example" : "Hello ZETA!"
+          }
+        }
       }
     }
   }

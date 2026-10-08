@@ -1,0 +1,18 @@
+server:
+  ssl:
+    trust-store: ${TLS_TRUSTSTORE}
+    trust-store-password: ${TLS_TRUSTSTORE_PASSWORD}
+    trust-store-type: ${TLS_TRUSTSTORE_TYPE:PKCS12}
+    client-auth: ${TLS_CLIENT_AUTH:need}
+
+management:
+  server:
+    ssl:
+      enabled: ${MANAGEMENT_SERVER_SSL_ENABLED:${SERVER_SSL_ENABLED:true}}
+      key-store: ${MANAGEMENT_TLS_KEYSTORE}
+      key-store-password: ${MANAGEMENT_TLS_KEYSTORE_PASSWORD}
+      key-store-type: ${MANAGEMENT_TLS_KEYSTORE_TYPE:PKCS12}
+      key-alias: ${MANAGEMENT_TLS_KEY_ALIAS:app}
+      # Kubernetes HTTP probes cannot present a client certificate. Keep actuator
+      # client auth disabled unless probes are changed to an mTLS-capable check.
+      client-auth: ${MANAGEMENT_SERVER_SSL_CLIENT_AUTH:none}
