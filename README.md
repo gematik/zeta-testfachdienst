@@ -91,8 +91,9 @@
 ## Build and Test
 
 The release version is defined once in [gradle.properties](gradle.properties). Runtime metadata in
-`application.yml` is derived from that value during `processResources`, and the checked-in AsyncAPI
-snapshot can be refreshed with `./gradlew syncVersionMetadata`.
+`application.yml`, including the OpenAPI and AsyncAPI versions, is derived from that value during
+`processResources`. Refresh the checked-in AsyncAPI version with `./gradlew syncVersionMetadata`
+and the Swagger snapshot with `./gradlew updateSwaggerApiDocs`.
 
 ```bash
 ./gradlew clean check        # format & static analysis (Checkstyle)
@@ -162,6 +163,28 @@ liveness/readiness probes and Prometheus scrapes without extra wiring.
 
 ## API Reference
 
+All REST controller routes and WebSocket handshake endpoints also accept the optional
+`/no-popp` prefix after the servlet context path. For example,
+`/achelos_testfachdienst/no-popp/api/erezept` uses the same handler as
+`/achelos_testfachdienst/api/erezept`. Original routes remain available, including
+`/hellozeta/no-popp` and `/ws-no-popp`. Responses and generated Location headers are unchanged.
+WebSocket clients can connect at `/no-popp/ws`; STOMP SEND and SUBSCRIBE destinations accept the
+same configured prefix and are normalized to their canonical destinations internally.
+Outgoing STOMP messages retain each aliased subscription's prefix while preserving concrete
+destinations for wildcard subscriptions. Canonical subscriptions remain unchanged.
+
+Configure `APP_ROUTE_PREFIXES` (or `app.routes.prefixes`) with a comma-separated list,
+for example `/no-popp,/another-prefix`. Set it to an empty string to disable aliases.
+Leading/trailing slashes are normalized; prefixes are literal path segments and are
+not stacked. New controller routes receive aliases automatically. Infrastructure
+routes such as Actuator, Swagger, and the H2 console keep their existing paths.
+Controller aliases receive the same resource server tracing as their original routes.
+Prefixes beginning with the STOMP path segments `/app`, `/topic`, `/queue`, or `/user`
+are rejected at startup. Prefix combinations that introduce these segments immediately
+after another prefix (for example `/no-popp,/no-popp/app`) are also rejected because
+they make STOMP destinations ambiguous. Nested prefixes such as `/no-popp,/no-popp/v2`
+remain supported.
+
 Unless noted otherwise, the paths below include the default context prefix
 `/achelos_testfachdienst`. Override the
 prefix via `SERVER_CONTEXT_PATH`. Actuator endpoints are exposed on the management server (same port
@@ -185,6 +208,8 @@ default, `8081` when the Kubernetes profile is active).
 | GET    | `/push/v1/channels/{pushkey}`               | Lists channels for a registered device.                                                                         |
 | POST   | `/push/v1/channels/{pushkey}`               | Updates channel states for a registered device.                                                                 |
 | POST   | `/test-support/notifications`               | Emits a correlated notification event.                                                                         |
+| GET | `/test-support/notifications/users/{userId}/channels` | Queries the Notification Service RS API with required `id_type` and optional `include_inactive`. |
+| POST | `/test-support/notifications/users/{userId}/channels/query` | Queries the NS channels using JSON input parameters. |
 | GET    | `/actuator/health`                          | Composite health indicator (includes readiness + liveness).                                                     |
 | GET    | `/actuator/health/liveness`                 | Liveness probe exposed via Spring Boot Actuator.                                                                |
 | GET    | `/actuator/health/readiness`                | Readiness probe exposed via Spring Boot Actuator.                                                               |
@@ -194,6 +219,61 @@ default, `8081` when the Kubernetes profile is active).
 | GET    | `/actuator/prometheus`                      | Prometheus metrics scrape endpoint (enabled in k8s profile).                                                    |
 | GET    | `/v3/api-docs`                              | Serves the OpenAPI document.                                                                                    |
 | GET    | `/swagger-ui/index.html`                    | Interactive Swagger UI powered by SpringDoc.                                                                    |
+
+The notification channel query calls `GET /users/{userId}/channels` on
+`NOTIFICATION_SERVICE_RS_BASE_URL`. The identifier type is forwarded to NS for validation;
+its supported values are `kvnr` and `telematik-id`. Omitting `include_inactive` retains the NS default, while `true` includes inactive channels.
+The response contains `user`, `has_registered_devices`, optional `registered_device_count`, and
+`channels`. Downstream client-error statuses are preserved as sanitized problem responses;
+transport failures return `503`, and server failures or unreadable/empty responses return `502`.
+All notification test-support endpoints use the same configured NS base URL and timeouts.
+The event endpoint also forwards an optional `Idempotency-Key` HTTP header and optional
+`reference` JSON field to NS without generating replacement values.
+
+To supply notification display text, add optional `title` and `message` fields:
+
+```http
+POST /achelos_testfachdienst/test-support/notifications
+Content-Type: application/json
+Idempotency-Key: android-test-002
+
+{
+  "user_id": "X110411675",
+  "event_type": "registered_client_activity",
+  "correlation_id": "android-test-002",
+  "title": "ZETA Test",
+  "message": "Hello from Testfachdienst!"
+}
+```
+
+The publisher includes `title`, `message`, `event_type`, and `correlation_id` in the NS `payload`.
+Missing or null titles default to `ZETA Notification`. Missing or null messages default to
+`Activity detected for a registered client.` for `registered_client_activity`, or
+`A new client has been registered.` for `new_client_registration`. Each display field can be
+omitted independently; existing requests remain valid and receive these defaults.
+
+Titles are limited to 80 characters and messages to 500 characters; supplied fields must not be
+blank. The complete payload must also fit in 1,018 UTF-8 JSON bytes (including metadata and JSON
+escaping), matching the encrypted push payload limit. Invalid requests return `400` before NS
+is called. Display text is plain text, without HTML or markup interpretation by Testfachdienst.
+Clients must interpret the payload fields to display the custom title and message; the server
+change alone does not update the Android driver's display handling.
+The channel query can also be triggered by
+`POST /test-support/notifications/users/{userId}/channels/query` with
+`{"id_type":"kvnr","include_inactive":true}`. This invokes the same NS GET operation
+and supports clients that preserve JSON bodies but do not forward query parameters.
+
+To observe downstream requests through Tiger in the local Helm deployment, set
+`testfachdienst.env` to supply `NOTIFICATION_SERVICE_RS_BASE_URL=http://tiger-proxy:80/notification-service-rs`.
+
+Example query through the generic SDK driver proxy:
+
+```text
+POST /proxy/achelos_testfachdienst/test-support/notifications/users/X110411675/channels/query
+Content-Type: application/json
+
+{"id_type":"kvnr","include_inactive":true}
+```
 
 The PushNotification setup routes implement the Fachdienst API from
 [gemF_PushNotification latest](https://gemspec.gematik.de/docs/gemF/gemF_PushNotification/latest/)
@@ -239,11 +319,14 @@ viewable in a small bundled UI.
 - Handshake (WebSocket endpoint):
     - ``wss://<host>:<port>/achelos_testfachdienst/ws`` (HTTPS mode)
     - ``ws://<host>:<port>/achelos_testfachdienst/ws`` (HTTP mode)
+    - ``wss://<host>:<port>/achelos_testfachdienst/ws-no-popp`` (HTTPS mode)
+    - ``ws://<host>:<port>/achelos_testfachdienst/ws-no-popp`` (HTTP mode)
 
 - Application prefix (SEND here): ``/<context-path>/app`` (default context path:
   ``/achelos_testfachdienst``). If no servlet context path is configured, use ``/app``.
     - Example client destinations:
         - ``/achelos_testfachdienst/app/erezept.create`` - create and broadcast
+        - ``/achelos_testfachdienst/no-popp/app/erezept.create`` - equivalent prefixed destination
         - ``/achelos_testfachdienst/app/erezept.read.{id}`` - fetch one and reply to caller
         - ``/achelos_testfachdienst/app/erezept.update.{id}`` - update and broadcast
         - ``/achelos_testfachdienst/app/erezept.delete.{id}`` - delete and ack to caller
@@ -254,6 +337,8 @@ viewable in a small bundled UI.
       is set)
     - Per-user replies: ``/achelos_testfachdienst/user/queue/erezept`` (or ``/user/queue/erezept`` without
       a context path)
+    - Prefixed aliases such as ``/achelos_testfachdienst/no-popp/topic/erezept`` and
+      ``/achelos_testfachdienst/no-popp/user/queue/erezept`` are also accepted.
 
 ### AsyncAPI (code-first) docs
 
@@ -340,6 +425,10 @@ GitLab pipeline (`.gitlab-ci.yml`) runs the following stages:
 Credentials for the Harbor registry are read from CI variables; Buildah uses the `vfs` storage
 driver to stay compatible
 with nested overlay filesystems.
+
+Successful default-branch builds also publish
+`<UTC timestamp>-<short commit SHA>-<job ID>`, for example
+`20260925T143012Z-a1b2c3d4-123456789`. Existing tags remain available.
 
 ## Logging and Observability
 

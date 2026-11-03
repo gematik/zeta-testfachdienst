@@ -29,11 +29,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.gematik.zeta.testfachdienst.model.HelloZetaResource;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.net.http.WebSocket;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -41,6 +46,13 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.messaging.converter.JacksonJsonMessageConverter;
+import org.springframework.messaging.simp.stomp.StompFrameHandler;
+import org.springframework.messaging.simp.stomp.StompHeaders;
+import org.springframework.messaging.simp.stomp.StompSession;
+import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
+import org.springframework.web.socket.client.standard.StandardWebSocketClient;
+import org.springframework.web.socket.messaging.WebSocketStompClient;
 
 /** Integration tests for externally visible application endpoints and context-path handling. */
 @SpringBootTest(
@@ -52,6 +64,114 @@ import org.springframework.http.MediaType;
         "server.servlet.context-path=/achelos_testfachdienst"
     })
 class TestfachdienstApplicationTests {
+
+  @Test
+  void originalAndPrefixedWebSocketEndpointsAcceptConnections() throws Exception {
+    for (String path : new String[]{"/ws", "/ws-no-popp", "/no-popp/ws",
+        "/no-popp/ws-no-popp"}) {
+      var socket = client.newWebSocketBuilder()
+          .buildAsync(URI.create("ws://localhost:" + port + CONTEXT_PATH + path),
+              new WebSocket.Listener() {})
+          .get(5, TimeUnit.SECONDS);
+      socket.sendClose(WebSocket.NORMAL_CLOSURE, "test complete").get(5, TimeUnit.SECONDS);
+      socket.abort();
+    }
+  }
+
+  @Test
+  void prefixedStompApplicationAndUserDestinationsExchangeMessages() throws Exception {
+    var response = new CompletableFuture<HelloZetaResource>();
+    var stompClient = new WebSocketStompClient(new StandardWebSocketClient());
+    stompClient.setMessageConverter(new JacksonJsonMessageConverter());
+    StompSession session = null;
+    try {
+      session = stompClient.connectAsync(
+              "ws://localhost:" + port + CONTEXT_PATH + "/no-popp/ws",
+              new StompSessionHandlerAdapter() {})
+          .get(5, TimeUnit.SECONDS);
+      session.subscribe(
+          CONTEXT_PATH + "/no-popp/user/queue/hellozeta",
+          new StompFrameHandler() {
+            @Override
+            public Type getPayloadType(StompHeaders headers) {
+              return HelloZetaResource.class;
+            }
+
+            @Override
+            public void handleFrame(StompHeaders headers, Object payload) {
+              response.complete((HelloZetaResource) payload);
+            }
+          });
+
+      session.send(CONTEXT_PATH + "/no-popp/app/hellozeta", new byte[0]);
+
+      assertThat(response.get(5, TimeUnit.SECONDS).getMessage()).isEqualTo("Hello ZETA!");
+    } finally {
+      if (session != null && session.isConnected()) {
+        session.disconnect();
+      }
+      stompClient.stop();
+    }
+  }
+
+  @Test
+  void prefixAliasesPreserveSuccessfulAndErrorResponses() throws Exception {
+    for (String path : new String[]{"/hellozeta", "/hellozeta/popp", "/hellozeta/no-popp",
+        "/hellozeta?responseDelay=0", "/hellozeta/delay/0", "/hellozeta/proxy-error",
+        "/api/erezept", "/api/erezept/999999", "/api/erezept/by-prescription/missing",
+        "/push/v1/pushers", "/push/v1/channels", "/push/v1/channels/missing"}) {
+      var original = get(appUri(path));
+      var prefixed = get(appUri("/no-popp" + path));
+      assertThat(prefixed.statusCode()).as(path).isEqualTo(original.statusCode());
+      assertThat(prefixed.body()).as(path).isEqualTo(original.body());
+      assertThat(prefixed.headers().firstValue("Content-Type"))
+          .isEqualTo(original.headers().firstValue("Content-Type"));
+      assertThat(prefixed.headers().firstValue("ZETA-Cause"))
+          .isEqualTo(original.headers().firstValue("ZETA-Cause"));
+    }
+    for (String path : new String[]{"/api/erezept", "/push/v1/pushers/set",
+        "/push/v1/channels/missing", "/test-support/notifications"}) {
+      assertThat(post(appUri("/no-popp" + path), "{}").statusCode()).as(path)
+          .isEqualTo(post(appUri(path), "{}").statusCode()).isEqualTo(400);
+    }
+  }
+
+  @Test
+  void prefixedCrudUsesTheSamePrescriptionAndCanonicalLocation() throws Exception {
+    String payload = """
+        {"medicationName":"Alias test","dosage":"Once daily",
+         "patientId":"PAT-ALIAS","practitionerId":"PRAC-ALIAS",
+         "prescriptionId":"RX-ALIAS","issuedAt":"2026-10-12T08:00:00Z",
+         "status":"CREATED"}
+        """;
+    var created = post(appUri("/no-popp/api/erezept"), payload);
+    assertThat(created.statusCode()).isEqualTo(201);
+    String location = created.headers().firstValue("Location").orElseThrow();
+    assertThat(location).startsWith(CONTEXT_PATH + "/api/erezept/");
+    String path = location.substring(CONTEXT_PATH.length());
+    assertThat(get(appUri(path)).body()).isEqualTo(created.body());
+    assertThat(get(appUri("/no-popp" + path)).body()).isEqualTo(created.body());
+    assertThat(post(appUri("/api/erezept"), payload).statusCode()).isEqualTo(409);
+    var update = HttpRequest.newBuilder(appUri("/no-popp" + path))
+        .header("Content-Type", "application/json")
+        .PUT(HttpRequest.BodyPublishers.ofString(payload.replace("Once daily", "Twice daily")))
+        .build();
+    var updated = client.send(update, HttpResponse.BodyHandlers.ofString());
+    assertThat(updated.statusCode()).isEqualTo(200);
+    assertThat(get(appUri(path)).body()).contains("Twice daily");
+    var delete = HttpRequest.newBuilder(appUri("/no-popp" + path)).DELETE().build();
+    var deleted = client.send(delete, HttpResponse.BodyHandlers.ofString());
+    assertThat(deleted.statusCode()).isEqualTo(204);
+    assertThat(get(appUri(path)).statusCode()).isEqualTo(404);
+  }
+
+  @Test
+  void aliasesArePublishedInOpenApi() throws Exception {
+    var paths = objectMapper.readTree(get(appUri("/v3/api-docs")).body()).path("paths");
+    assertThat(paths.has("/no-popp/api/erezept")).isTrue();
+    assertThat(paths.has("/no-popp/jobs/info")).isTrue();
+    assertThat(paths.has("/no-popp/test-support/notifications")).isTrue();
+  }
 
   private static final String CONTEXT_PATH = "/achelos_testfachdienst";
 
@@ -95,6 +215,7 @@ class TestfachdienstApplicationTests {
     JsonNode apiDocs = objectMapper.readTree(response.body());
 
     assertThat(apiDocs.path("openapi").asText()).isNotBlank();
+    assertThat(apiDocs.at("/info/version").asText()).isEqualTo(productVersion);
     assertThat(apiDocs.path("paths").has("/api/erezept")).isTrue();
     assertThat(apiDocs.path("paths").has("/test-support/notifications")).isTrue();
     assertThat(apiDocs.at("/paths/~1api~1erezept/post/summary").asText())

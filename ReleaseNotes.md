@@ -2,6 +2,32 @@
 
 # Release Notes ZETA Testfachdienst
 
+## Version 2.0.0
+
+TestFachdienst 2.0.0
+
+#### Release Focus:
+
+- Added `/hellozeta/popp`, `/hellozeta/no-popp`, and the `/ws-no-popp` WebSocket handshake endpoint.
+- Added configurable route aliases through `APP_ROUTE_PREFIXES` (default `/no-popp`) for REST controllers, WebSocket handshakes, and STOMP SEND/SUBSCRIBE destinations while preserving the original routes.
+- Fixed outgoing STOMP destinations to retain each subscription's alias prefix, including user replies and concrete destinations for wildcard subscriptions; subscription mappings are cleaned up on unsubscribe and disconnect.
+- Extended resource server tracing to aliased controller routes and added startup validation for ambiguous or reserved STOMP prefixes.
+- Added `GET /test-support/notifications/users/{userId}/channels` and `POST /test-support/notifications/users/{userId}/channels/query` to query Notification Service channels and device registration information with `id_type` and optional `include_inactive` parameters.
+- Added forwarding of the optional `Idempotency-Key` header and `reference` field when publishing notification test events.
+- Added optional notification `title` and `message` fields with defaults for existing requests, Unicode-aware blank-text validation, and validation of the complete UTF-8 JSON payload size.
+- Expanded notification, route alias, tracing, and STOMP test coverage and updated the checked-in REST API documentation for the notification API extensions.
+- Added timestamped container image tags containing the UTC build time, commit SHA, and job ID for default-branch builds.
+
+### Known issues:
+
+- None documented for this release.
+
+#### Limitations
+
+- Notification titles are limited to 80 characters and messages to 500 characters. The complete payload, including event metadata and JSON escaping, must fit in 1,018 UTF-8 bytes; invalid requests return `HTTP 400` before the Notification Service is called.
+- Clients must interpret the notification payload's `title` and `message` fields to display custom text.
+- Route prefixes must contain literal path segments and must not conflict with `/app`, `/topic`, `/queue`, or `/user`, including conflicts introduced by combinations of configured prefixes.
+
 ## Version 1.3.0
 
 TestFachdienst 1.3.0

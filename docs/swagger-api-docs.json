@@ -2,7 +2,7 @@
   "openapi" : "3.1.0",
   "info" : {
     "title" : "OpenAPI definition",
-    "version" : "v0"
+    "version" : "2.0.0"
   },
   "servers" : [ {
     "url" : "https://localhost:8080/achelos_testfachdienst",
@@ -179,6 +179,14 @@
         "tags" : [ "Notification test events" ],
         "summary" : "Emits a deterministic notification test event",
         "operationId" : "trigger",
+        "parameters" : [ {
+          "name" : "Idempotency-Key",
+          "in" : "header",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -226,6 +234,43 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/de.gematik.zeta.testfachdienst.model.NotificationEventResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/test-support/notifications/users/{userId}/channels/query" : {
+      "post" : {
+        "tags" : [ "Notification test events" ],
+        "summary" : "Triggers a Notification Service channel query from JSON parameters",
+        "operationId" : "queryNotificationUserChannels",
+        "parameters" : [ {
+          "name" : "userId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/de.gematik.zeta.testfachdienst.model.NotificationChannelsQuery"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "User channels returned by the NS",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/de.gematik.zeta.testfachdienst.model.NotificationChannelsResponse"
                 }
               }
             }
@@ -433,6 +478,77 @@
         }
       }
     },
+    "/test-support/notifications/users/{userId}/channels" : {
+      "get" : {
+        "tags" : [ "Notification test events" ],
+        "summary" : "Queries user channels through the Notification Service resource-server API",
+        "operationId" : "getNotificationUserChannels",
+        "parameters" : [ {
+          "name" : "userId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id_type",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "include_inactive",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "User channels and device registration information returned by the NS",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/de.gematik.zeta.testfachdienst.model.NotificationChannelsResponse"
+                }
+              }
+            }
+          },
+          "4XX" : {
+            "description" : "Invalid request or request rejected by the Notification Service",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/org.springframework.http.ProblemDetail"
+                }
+              }
+            }
+          },
+          "502" : {
+            "description" : "The Notification Service returned an invalid response",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/org.springframework.http.ProblemDetail"
+                }
+              }
+            }
+          },
+          "503" : {
+            "description" : "The Notification Service is unavailable",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/org.springframework.http.ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/springwolf/ui-config" : {
       "get" : {
         "tags" : [ "ui-config-controller" ],
@@ -569,7 +685,40 @@
         }
       }
     },
-    "/hellozeta" : {
+    "/hellozeta/proxy-error" : {
+      "get" : {
+        "tags" : [ "Hello ZETA" ],
+        "summary" : "Return a synthetic proxy error",
+        "description" : "Returns the normal greeting payload but with HTTP 400 and the ZETA-Cause header set to Proxy so callers can test error-handling flows.",
+        "operationId" : "getHelloZetaProxyErrorResponse",
+        "responses" : {
+          "400" : {
+            "description" : "Synthetic proxy error returned",
+            "headers" : {
+              "ZETA-Cause" : {
+                "description" : "Reason for the proxy-specific failure.",
+                "style" : "simple",
+                "schema" : {
+                  "type" : "object",
+                  "example" : "Proxy"
+                }
+              }
+            },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/HelloZetaResource"
+                },
+                "example" : {
+                  "message" : "Hello ZETA!"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/hellozeta/popp" : {
       "get" : {
         "tags" : [ "Hello ZETA" ],
         "summary" : "Return the Hello ZETA greeting",
@@ -602,25 +751,58 @@
         }
       }
     },
-    "/hellozeta/proxy-error" : {
+    "/hellozeta/no-popp" : {
       "get" : {
         "tags" : [ "Hello ZETA" ],
-        "summary" : "Return a synthetic proxy error",
-        "description" : "Returns the normal greeting payload but with HTTP 400 and the ZETA-Cause header set to Proxy so callers can test error-handling flows.",
-        "operationId" : "getHelloZetaProxyErrorResponse",
+        "summary" : "Return the Hello ZETA greeting",
+        "description" : "Provides a minimal JSON payload that can be used as a smoke-test endpoint. The optional responseDelay query parameter delays the response by the given number of seconds.",
+        "operationId" : "getHelloZetaResponse_1",
+        "parameters" : [ {
+          "name" : "responseDelay",
+          "in" : "query",
+          "description" : "Optional response delay in seconds.",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
         "responses" : {
-          "400" : {
-            "description" : "Synthetic proxy error returned",
-            "headers" : {
-              "ZETA-Cause" : {
-                "description" : "Reason for the proxy-specific failure.",
-                "style" : "simple",
+          "200" : {
+            "description" : "Greeting returned successfully",
+            "content" : {
+              "application/json" : {
                 "schema" : {
-                  "type" : "object",
-                  "example" : "Proxy"
+                  "$ref" : "#/components/schemas/HelloZetaResource"
+                },
+                "example" : {
+                  "message" : "Hello ZETA!"
                 }
               }
-            },
+            }
+          }
+        }
+      }
+    },
+    "/hellozeta" : {
+      "get" : {
+        "tags" : [ "Hello ZETA" ],
+        "summary" : "Return the Hello ZETA greeting",
+        "description" : "Provides a minimal JSON payload that can be used as a smoke-test endpoint. The optional responseDelay query parameter delays the response by the given number of seconds.",
+        "operationId" : "getHelloZetaResponse_2",
+        "parameters" : [ {
+          "name" : "responseDelay",
+          "in" : "query",
+          "description" : "Optional response delay in seconds.",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Greeting returned successfully",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -795,6 +977,7 @@
       },
       "de.gematik.zeta.testfachdienst.model.NotificationEventRequest" : {
         "type" : "object",
+        "description" : "Notification event with optional display text. The payload, including event metadata, must not exceed 1018 UTF-8 JSON bytes.",
         "properties" : {
           "user_id" : {
             "type" : "string",
@@ -807,6 +990,25 @@
           "correlation_id" : {
             "type" : "string",
             "minLength" : 1
+          },
+          "reference" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string",
+            "description" : "Plain-text title; defaults to ZETA Notification",
+            "example" : "ZETA Test",
+            "maxLength" : 80,
+            "minLength" : 0,
+            "pattern" : "[\\s\\S]*[^\\u0009-\\u000D\\u0020\\u0085\\u00A0\\u1680\\u2000-\\u200A\\u2028\\u2029\\u202F\\u205F\\u3000][\\s\\S]*"
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "Plain-text message; defaults to a description of the event",
+            "example" : "Hello from Testfachdienst!",
+            "maxLength" : 500,
+            "minLength" : 0,
+            "pattern" : "[\\s\\S]*[^\\u0009-\\u000D\\u0020\\u0085\\u00A0\\u1680\\u2000-\\u200A\\u2028\\u2029\\u202F\\u205F\\u3000][\\s\\S]*"
           }
         },
         "required" : [ "correlation_id", "event_type", "user_id" ],
@@ -856,6 +1058,71 @@
           }
         },
         "title" : "NotificationEventResponse"
+      },
+      "de.gematik.zeta.testfachdienst.model.NotificationChannelsQuery" : {
+        "type" : "object",
+        "properties" : {
+          "id_type" : {
+            "type" : "string",
+            "minLength" : 1
+          },
+          "include_inactive" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "id_type" ],
+        "title" : "NotificationChannelsQuery"
+      },
+      "PushChannel" : {
+        "type" : "object",
+        "description" : "Push notification channel state for A_27190",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "Channel identifier",
+            "example" : "erezept"
+          },
+          "status" : {
+            "type" : "string",
+            "description" : "Channel status for A_27190; defaults to not_set for A_27193-02",
+            "enum" : [ "enabled", "disabled", "not_set" ],
+            "example" : "enabled"
+          }
+        },
+        "title" : "PushChannel"
+      },
+      "de.gematik.zeta.testfachdienst.model.NotificationChannelsResponse" : {
+        "type" : "object",
+        "properties" : {
+          "user" : {
+            "$ref" : "#/components/schemas/de.gematik.zeta.testfachdienst.model.NotificationChannelsResponse.UserIdentifier"
+          },
+          "has_registered_devices" : {
+            "type" : "boolean"
+          },
+          "registered_device_count" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "channels" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/PushChannel"
+            }
+          }
+        }
+      },
+      "de.gematik.zeta.testfachdienst.model.NotificationChannelsResponse.UserIdentifier" : {
+        "type" : "object",
+        "properties" : {
+          "id_type" : {
+            "type" : "string"
+          },
+          "value" : {
+            "type" : "string"
+          }
+        },
+        "title" : "UserIdentifier"
       },
       "PushPusher" : {
         "type" : "object",
@@ -927,24 +1194,6 @@
             "example" : "M_MISSING_PARAM"
           }
         }
-      },
-      "PushChannel" : {
-        "type" : "object",
-        "description" : "Push notification channel state for A_27190",
-        "properties" : {
-          "id" : {
-            "type" : "string",
-            "description" : "Channel identifier",
-            "example" : "erezept"
-          },
-          "status" : {
-            "type" : "string",
-            "description" : "Channel status for A_27190; defaults to not_set for A_27193-02",
-            "enum" : [ "enabled", "disabled", "not_set" ],
-            "example" : "enabled"
-          }
-        },
-        "title" : "PushChannel"
       },
       "PushChannelsResponse" : {
         "type" : "object",

@@ -79,7 +79,7 @@ public class HelloZetaController {
    * @param responseDelay optional delay in seconds before sending the response
    * @return HTTP 200 response containing the greeting payload
    */
-  @GetMapping
+  @GetMapping({"", "/popp", "/no-popp"})
   @Operation(
       summary = "Return the Hello ZETA greeting",
       description = "Provides a minimal JSON payload that can be used as a smoke-test "

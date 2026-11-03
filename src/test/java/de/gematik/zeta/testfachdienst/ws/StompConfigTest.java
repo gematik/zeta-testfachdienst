@@ -26,11 +26,21 @@
 package de.gematik.zeta.testfachdienst.ws;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import de.gematik.zeta.testfachdienst.config.RouteAliases;
 import java.lang.reflect.Field;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
+import org.springframework.web.socket.config.annotation.StompWebSocketEndpointRegistration;
+import org.springframework.web.socket.server.support.WebSocketHandlerMapping;
 
 /**
  * Unit tests for {@link StompConfig} verifying the handling of servlet context paths.
@@ -38,8 +48,37 @@ import org.springframework.test.util.ReflectionTestUtils;
 class StompConfigTest {
 
   @Test
+  void registersOriginalAndConfiguredHandshakeAliases() {
+    var config = new StompConfig(new RouteAliases("/no-popp,/other"));
+    var registry = mock(StompEndpointRegistry.class);
+    var registration = mock(StompWebSocketEndpointRegistration.class);
+    when(registry.addEndpoint("/ws", "/ws-no-popp", "/no-popp/ws", "/no-popp/ws-no-popp",
+        "/other/ws", "/other/ws-no-popp")).thenReturn(registration);
+    when(registration.setAllowedOriginPatterns("*")).thenReturn(registration);
+
+    config.registerStompEndpoints(registry);
+
+    verify(registry).addEndpoint("/ws", "/ws-no-popp", "/no-popp/ws", "/no-popp/ws-no-popp",
+        "/other/ws", "/other/ws-no-popp");
+  }
+
+  @Test
+  void registersWebSocketHandshakeEndpoints() {
+    var config = new StompConfig(new RouteAliases(""));
+    var registry = mock(StompEndpointRegistry.class);
+    var registration = mock(StompWebSocketEndpointRegistration.class);
+    when(registry.addEndpoint("/ws", "/ws-no-popp"))
+        .thenReturn(registration);
+    when(registration.setAllowedOriginPatterns("*")).thenReturn(registration);
+
+    config.registerStompEndpoints(registry);
+
+    verify(registry).addEndpoint("/ws", "/ws-no-popp");
+  }
+
+  @Test
   void usesPlainPrefixesWhenNoContextPathIsSet() {
-    var config = new StompConfig();
+    var config = new StompConfig(new RouteAliases(""));
     ReflectionTestUtils.setField(config, "contextPath", "");
 
     var brokerPrefixes =
@@ -55,7 +94,7 @@ class StompConfigTest {
 
   @Test
   void usesOnlyContextPrefixedDestinationsWhenContextPathIsSet() {
-    var config = new StompConfig();
+    var config = new StompConfig(new RouteAliases(""));
     ReflectionTestUtils.setField(config, "contextPath", "/achelos_testfachdienst");
 
     var brokerPrefixes =
@@ -72,8 +111,32 @@ class StompConfigTest {
   }
 
   @Test
+  void appliesConfiguredAliasesToApplicationAndBrokerPrefixes() {
+    var config = new StompConfig(new RouteAliases("/no-popp,/other"));
+    ReflectionTestUtils.setField(config, "contextPath", "/achelos_testfachdienst");
+
+    var brokerPrefixes =
+        (String[]) ReflectionTestUtils.invokeMethod(config, "resolveBrokerPrefixes");
+    var appPrefixes =
+        (String[]) ReflectionTestUtils.invokeMethod(config, "resolveApplicationPrefixes");
+
+    assertThat(brokerPrefixes).containsExactlyInAnyOrder(
+        "/queue",
+        "/achelos_testfachdienst/topic",
+        "/achelos_testfachdienst/queue",
+        "/achelos_testfachdienst/no-popp/topic",
+        "/achelos_testfachdienst/no-popp/queue",
+        "/achelos_testfachdienst/other/topic",
+        "/achelos_testfachdienst/other/queue");
+    assertThat(appPrefixes).containsExactly(
+        "/achelos_testfachdienst/app",
+        "/achelos_testfachdienst/no-popp/app",
+        "/achelos_testfachdienst/other/app");
+  }
+
+  @Test
   void normalizesContextPathWithoutLeadingSlashAndWithTrailingSlash() {
-    var config = new StompConfig();
+    var config = new StompConfig(new RouteAliases(""));
     ReflectionTestUtils.setField(config, "contextPath", "achelos_testfachdienst/");
 
     var brokerPrefixes =
@@ -91,7 +154,7 @@ class StompConfigTest {
 
   @Test
   void exposesConfiguredHeartbeatIntervals() {
-    var config = new StompConfig();
+    var config = new StompConfig(new RouteAliases(""));
     ReflectionTestUtils.setField(config, "serverHeartbeatMs", 2_500L);
     ReflectionTestUtils.setField(config, "clientHeartbeatMs", 4_000L);
 

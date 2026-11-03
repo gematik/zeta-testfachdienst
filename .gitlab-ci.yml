@@ -182,6 +182,12 @@ publish-image:
       if [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ] || [ -n "$CI_COMMIT_TAG" ]; then
         EXTRA_TAG_ARGS="-t ${CONTAINER_REGISTRY_URL}:latest"
       fi
+      # UTC build time is sortable; job IDs distinguish rebuilds and retries.
+      if [ -n "${CI_COMMIT_BRANCH:-}" ] && [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ]; then
+        BUILD_TAG="$(date -u +%Y%m%dT%H%M%SZ)-${CI_COMMIT_SHORT_SHA}-${CI_JOB_ID}"
+        EXTRA_TAG_ARGS="${EXTRA_TAG_ARGS} -t ${CONTAINER_REGISTRY_URL}:${BUILD_TAG}"
+        echo "Publishing build image ${CONTAINER_REGISTRY_URL}:${BUILD_TAG}"
+      fi
       docker buildx build \
         --platform "$TARGET_PLATFORMS" \
         -t "${CONTAINER_REGISTRY_URL}:${TAG}" \
