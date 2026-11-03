@@ -64,7 +64,7 @@ public class NotificationEventExceptionHandler {
         HttpStatus.SERVICE_UNAVAILABLE,
         UNAVAILABLE_TYPE,
         "Notification Service unavailable",
-        "The notification event could not be delivered. Try again later.");
+        "The notification request could not be completed. Try again later.");
   }
 
   /**

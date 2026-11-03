@@ -104,6 +104,9 @@ logging:
     de.gematik.zeta.testfachdienst: ${APP_LOG_LEVEL:INFO}
 
 app:
+  version: "@projectVersion@"
+  routes:
+    prefixes: ${APP_ROUTE_PREFIXES:/no-popp}
   websocket:
     transport:
       message-size-limit-bytes: ${APP_WEBSOCKET_MESSAGE_SIZE_LIMIT_BYTES:65536}

@@ -25,6 +25,9 @@
 
 package de.gematik.zeta.testfachdienst.ws;
 
+import de.gematik.zeta.testfachdienst.config.RouteAliases;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -44,18 +47,20 @@ import org.springframework.web.socket.config.annotation.WebSocketTransportRegist
  * defines the application's messaging topology:
  *
  * <ul>
- *   <li>Registers the STOMP handshake endpoint at {@code /ws}.
+ *   <li>Registers the STOMP handshake endpoints at {@code /ws} and
+ *       {@code /ws-no-popp}.
  *       <ul>
- *         <li>Clients must connect to {@code ws://.../ws} or {@code wss://.../ws}.</li>
+ *         <li>Clients connect to either endpoint using {@code ws://} or {@code wss://}.</li>
  *         <li>Uses native WebSocket protocol (no SockJS fallback).</li>
  *       </ul>
  *   </li>
  *   <li>Configures broker destinations:
  *       <ul>
- *         <li>{@code /app} is the <em>application prefix</em>:
+ *         <li>{@code /app} and its configured aliases are <em>application prefixes</em>:
  *             clients SEND messages here; they are routed to {@code @MessageMapping}
  *             methods in controllers like {@link ErezeptWsController}.</li>
- *         <li>{@code /topic} and {@code /queue} are the <em>simple broker prefixes</em>:
+ *         <li>{@code /topic}, {@code /queue}, and their configured aliases are the
+ *             <em>simple broker prefixes</em>:
  *             clients SUBSCRIBE here to receive messages broadcast or directed
  *             by the application.</li>
  *         <li>{@code /user} is configured as the <em>user destination prefix</em>:
@@ -81,6 +86,15 @@ import org.springframework.web.socket.config.annotation.WebSocketTransportRegist
 @SuppressWarnings("unused") // managed by Spring component scanning
 @Slf4j
 public class StompConfig implements WebSocketMessageBrokerConfigurer {
+
+  private final RouteAliases routeAliases;
+  private final StompSubscriptionDestinations subscriptionDestinations =
+      new StompSubscriptionDestinations();
+
+  /** Creates the STOMP configuration with the shared URL prefix aliases. */
+  public StompConfig(RouteAliases routeAliases) {
+    this.routeAliases = routeAliases;
+  }
 
   @Value("${server.servlet.context-path:}")
   private String contextPath;
@@ -113,7 +127,7 @@ public class StompConfig implements WebSocketMessageBrokerConfigurer {
    */
   @Override
   public void registerStompEndpoints(StompEndpointRegistry registry) {
-    registry.addEndpoint("/ws")
+    registry.addEndpoint(routeAliases.expand("/ws", "/ws-no-popp"))
         .setAllowedOriginPatterns("*")
         .addInterceptors(new LoggingHandshakeInterceptor());
   }
@@ -125,7 +139,21 @@ public class StompConfig implements WebSocketMessageBrokerConfigurer {
    */
   @Override
   public void configureClientInboundChannel(ChannelRegistration registration) {
-    registration.interceptors(new StompFrameLoggingInterceptor());
+    registration.interceptors(
+        new StompDestinationAliasInterceptor(routeAliases, contextPath, subscriptionDestinations),
+        new StompFrameLoggingInterceptor());
+  }
+
+  /** Restores each subscription's original destination on outgoing messages. */
+  @Override
+  public void configureClientOutboundChannel(ChannelRegistration registration) {
+    registration.interceptors(subscriptionDestinations);
+  }
+
+  /** Registers disconnect cleanup for subscriptions, including unexpected transport closure. */
+  @Bean
+  public StompSubscriptionDestinations stompSubscriptionDestinations() {
+    return subscriptionDestinations;
   }
 
   /**
@@ -179,10 +207,10 @@ public class StompConfig implements WebSocketMessageBrokerConfigurer {
    * @return array of broker prefixes (topic/queue variants)
    */
   private String[] resolveBrokerPrefixes() {
-    if (isContextPathBlank()) {
-      return new String[]{"/topic", "/queue"};
-    }
-    return new String[]{withContextPath("/topic"), "/queue", withContextPath("/queue")};
+    var prefixes = new LinkedHashSet<String>();
+    prefixes.add("/queue");
+    prefixes.addAll(Arrays.asList(withContextPath(routeAliases.expand("/topic", "/queue"))));
+    return prefixes.toArray(String[]::new);
   }
 
   /**
@@ -191,9 +219,7 @@ public class StompConfig implements WebSocketMessageBrokerConfigurer {
    * @return array containing the application prefix, context-aware when needed
    */
   private String[] resolveApplicationPrefixes() {
-    return isContextPathBlank()
-        ? new String[]{"/app"}
-        : new String[]{withContextPath("/app")};
+    return withContextPath(routeAliases.expand("/app"));
   }
 
   /**
@@ -239,5 +265,9 @@ public class StompConfig implements WebSocketMessageBrokerConfigurer {
       normalizedContext = normalizedContext.substring(0, normalizedContext.length() - 1);
     }
     return normalizedContext + destination;
+  }
+
+  private String[] withContextPath(String[] destinations) {
+    return Arrays.stream(destinations).map(this::withContextPath).toArray(String[]::new);
   }
 }

@@ -38,14 +38,17 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class ResourceServerTracingConfig implements WebMvcConfigurer {
 
   private final OpenTelemetry openTelemetry;
+  private final RouteAliases routeAliases;
 
   /**
    * Create tracing configuration with the shared OpenTelemetry instance.
    *
    * @param openTelemetry OpenTelemetry instance used to create resource server spans
+   * @param routeAliases configured aliases for the traced controller routes
    */
-  public ResourceServerTracingConfig(OpenTelemetry openTelemetry) {
+  public ResourceServerTracingConfig(OpenTelemetry openTelemetry, RouteAliases routeAliases) {
     this.openTelemetry = openTelemetry;
+    this.routeAliases = routeAliases;
   }
 
   /**
@@ -56,7 +59,7 @@ public class ResourceServerTracingConfig implements WebMvcConfigurer {
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
     registry.addInterceptor(new ResourceServerTraceInterceptor(openTelemetry))
-        .addPathPatterns(
-            "/hellozeta/**", "/api/**", "/jobs/**", "/push/v1/**", "/test-support/**");
+        .addPathPatterns(routeAliases.expand(
+            "/hellozeta/**", "/api/**", "/jobs/**", "/push/v1/**", "/test-support/**"));
   }
 }

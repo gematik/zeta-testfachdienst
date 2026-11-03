@@ -25,15 +25,19 @@
 
 package de.gematik.zeta.testfachdienst.service;
 
+import de.gematik.zeta.testfachdienst.model.NotificationChannelsResponse;
 import de.gematik.zeta.testfachdienst.model.NotificationEventRequest;
 import de.gematik.zeta.testfachdienst.model.NotificationEventResponse;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 
-/** Publishes deterministic Testfachdienst events to the Notification Service. */
+/** Publishes notification events and queries user channels through the Notification Service. */
 @Service
 public class NotificationEventPublisher {
 
@@ -63,17 +67,55 @@ public class NotificationEventPublisher {
    * @return Notification Service response
    */
   public NotificationEventResponse publish(NotificationEventRequest request) {
-    var notification = Map.of(
+    return publish(request, null);
+  }
+
+  /**
+   * Publishes an event with an optional idempotency key and reference.
+   *
+   * @param request event and optional reference
+   * @param idempotencyKey optional submission key forwarded to the Notification Service
+   * @return acceptance result from the Notification Service
+   */
+  public NotificationEventResponse publish(
+      NotificationEventRequest request, String idempotencyKey) {
+    var notification = new LinkedHashMap<String, Object>(Map.of(
         "user", Map.of("id_type", "kvnr", "value", request.userId()),
         "channel", channel,
-        "payload", Map.of(
-            "event_type", request.eventType().value(),
-            "correlation_id", request.correlationId()));
-
-    return restClient.post()
+        "payload", request.payload()));
+    if (request.reference() != null) {
+      notification.put("reference", request.reference());
+    }
+    var submission = restClient.post()
         .uri(uriBuilder -> uriBuilder.pathSegment("notifications").build())
-        .body(notification)
+        .body(notification);
+    if (idempotencyKey != null) {
+      submission.header("Idempotency-Key", idempotencyKey);
+    }
+    return submission.retrieve().body(NotificationEventResponse.class);
+  }
+
+  /**
+   * Queries the user's channels and device registration information from the Notification Service.
+   *
+   * @param userId user identifier value
+   * @param idType identifier type, such as kvnr or telematik-id
+   * @param includeInactive whether to include inactive channels; null retains the service default
+   * @return channel response from the Notification Service
+   * @throws RestClientException if the downstream request fails or returns an empty response
+   */
+  public NotificationChannelsResponse getChannels(
+      String userId, String idType, Boolean includeInactive) {
+    var response = restClient.get()
+        .uri(uriBuilder -> uriBuilder.pathSegment("users", "{userId}", "channels")
+            .queryParam("id_type", "{idType}")
+            .queryParamIfPresent("include_inactive", Optional.ofNullable(includeInactive))
+            .build(Map.of("userId", userId, "idType", idType)))
         .retrieve()
-        .body(NotificationEventResponse.class);
+        .body(NotificationChannelsResponse.class);
+    if (response == null) {
+      throw new RestClientException("Empty Notification Service channel response");
+    }
+    return response;
   }
 }
